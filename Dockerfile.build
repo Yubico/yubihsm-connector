@@ -1,0 +1,23 @@
+FROM debian:stretch-slim
+
+WORKDIR /yubihsm-connector
+VOLUME /yubihsm-connector
+
+ENV GOROOT=/opt/go
+ENV GOPATH=/root/go/
+ENV PATH=$GOROOT/bin:$GOPATH/bin:$PATH
+
+RUN apt-get update -y && apt-get dist-upgrade -y && apt-get install -y \
+		curl \
+		git \
+		pkg-config \
+		build-essential \
+		libusb-1.0.0-dev
+
+RUN curl -o /tmp/go.tgz https://storage.googleapis.com/golang/go1.9.4.linux-amd64.tar.gz && \
+  sha256sum /tmp/go.tgz | grep 15b0937615809f87321a457bb1265f946f9f6e736c563d6c5e0bd2c22e44f779
+RUN tar -zxvf /tmp/go.tgz -C /opt && rm -rf /tmp/go.tgz
+
+RUN go get github.com/constabulary/gb/...
+
+CMD make rebuild

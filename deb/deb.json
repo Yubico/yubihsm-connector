@@ -1,0 +1,42 @@
+{
+  "name": "yubihsm-connector",
+  "maintainer": "Yubico Open Source Maintainers <ossmaint@yubico.com>",
+  "description": "USB to HTTP bridge for the YubiHSM",
+  "homepage": "https://developers.yubico.com/YubiHSM2/Component_Reference/yubihsm-connector/",
+  "files": [
+    {
+      "from": "bin/!name!",
+      "to": "/usr/bin",
+      "base": "bin/",
+      "fperm": "0755"
+    },
+    {
+      "from": "deb/70-!name!.rules",
+      "to": "/lib/udev/rules.d",
+      "base": "deb/",
+      "fperm": "0644"
+    },
+    {
+      "from": "deb/!name!.yaml",
+      "to": "/etc/",
+      "base": "deb/",
+      "fperm": "0644"
+    }
+  ],
+  "copyrights": [
+    {
+      "files": "*",
+      "copyright": "2016 Yubico AB",
+      "license": "BSD",
+      "file": "LICENSE"
+    }
+  ],
+  "depends": [
+    "libusb-1.0-0",
+    "adduser"
+  ],
+  "postinst-file": "deb/postinst.sh",
+  "systemd-file": "deb/yubihsm-connector.service",
+  "init-file": "deb/yubihsm-connector",
+  "conf-files": ["/etc/!name!.yaml"]
+}

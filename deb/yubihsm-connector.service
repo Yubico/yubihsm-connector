@@ -1,0 +1,25 @@
+[Unit]
+Description=YubiHSM connector
+Documentation=https://developers.yubico.com/YubiHSM2/Component_Reference/yubihsm-connector/
+After=network-online.target
+Wants=network-online.target systemd-networkd-wait-online.service
+
+[Service]
+Restart=on-abnormal
+
+; User and group the process will run as.
+User=yubihsm-connector
+Group=yubihsm-connector
+
+ExecStart=/usr/bin/yubihsm-connector -c /etc/yubihsm-connector.yaml
+
+; Use private /tmp and /var/tmp, which are discarded after caddy stops.
+PrivateTmp=true
+; Hide /home, /root, and /run/user. Nobody will steal your SSH-keys.
+ProtectHome=true
+; Make /usr, /boot, /etc and possibly some more folders read-only.
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target
+

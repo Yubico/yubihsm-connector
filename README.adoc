@@ -1,0 +1,71 @@
+= YubiHSM Connector
+
+== Usage
+
+The connector is self documenting, peruse the `--help`'s.
+
+....
+YubiHSM Connector
+
+Usage:
+  yubihsm-connector [flags]
+  yubihsm-connector [command]
+
+Available Commands:
+  config
+  service
+
+Flags:
+  -c, --config string   config file
+  -d, --debug           debug output
+
+Use "yubihsm-connector [command] --help" for more information about a command.
+....
+
+== Development
+
+=== Dependencies
+
+- link:https://golang.org[golang (>= 1.7.3)]
+- link:https://getgb.io[gb]
+- link:https://pre-commit.com[pre-commit]
+- link:https://libusb.info[libusb-1.0]
+
+=== pre-commit
+
+....
+$ pre-commit install
+....
+
+See the configured [hooks](.pre-commit-config.yaml) for details.
+
+=== Building
+
+....
+$ make
+....
+
+=== Linting
+
+....
+$ make vet
+$ make fmt
+....
+
+=== License
+
+....
+ Copyright 2016-2018 Yubico AB
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+....

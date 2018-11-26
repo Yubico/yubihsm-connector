@@ -1,0 +1,6 @@
+ACTION!="add|change", GOTO="yubihsm_connector_end"
+
+#Yubico YubiHSM2
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1050", ATTRS{idProduct}=="0030", OWNER="yubihsm-connector"
+
+LABEL="yubihsm_connector_end"

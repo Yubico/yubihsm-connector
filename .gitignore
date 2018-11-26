@@ -1,0 +1,5 @@
+resource.syso
+vendor/pkg/*
+.tags*
+src/yubihsm-connector/version.go
+src/yubihsm-connector/versioninfo.json

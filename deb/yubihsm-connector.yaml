@@ -1,0 +1,14 @@
+# Certificate (X.509)
+#cert: ""
+#
+# Certificate key
+#key: ""
+#
+# Listening address. Defaults to "127.0.0.1:12345".
+#listen: "127.0.0.1:12345"
+#
+# Device serial in case of multiple devices
+#serial: ""
+#
+# Log to syslog/eventlog. Defaults to "false".
+#syslog: "false"

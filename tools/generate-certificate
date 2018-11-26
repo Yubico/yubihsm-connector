@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+if [[ ! -z "$DEBUG" ]]; then
+  set -x
+fi
+set -eu -o pipefail
+
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly SOURCE_DIR="$SCRIPT_DIR/.."
+
+main() {
+  local out="$SOURCE_DIR/var"
+  if [[ $# -eq 1 ]]; then
+    out="$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
+    if [[ ! -d "$out" ]]; then
+      printf '%s: not a directory\n' "$1" >&2
+      exit 1
+    fi
+  fi
+
+  local key="$out/cert.key"
+  local cert="$out/cert.crt"
+  if [[ -f "$key" && -f "$cert" ]]; then
+    exit 0
+  fi
+
+  openssl req -newkey rsa:2048 -x509 -days 365 -nodes \
+    -subj "/C=SE/O=EXAMPLE/CN=example.com"            \
+    -keyout "$key" -out "$cert" &>/dev/null
+
+  echo "$key"
+  echo "$cert"
+}
+
+pushd "$SOURCE_DIR" &>/dev/null
+  main "$@"
+popd &>/dev/null
