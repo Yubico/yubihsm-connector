@@ -125,13 +125,6 @@
 			"path": "/usb"
 		},
 		{
-			"importpath": "github.com/ugorji/go/codec",
-			"repository": "https://github.com/ugorji/go",
-			"revision": "f3cacc17c85ecb7f1b6a9e373ee85d1480919868",
-			"branch": "master",
-			"path": "/codec"
-		},
-		{
 			"importpath": "github.com/xordataexchange/crypt/backend",
 			"repository": "https://github.com/xordataexchange/crypt",
 			"revision": "b2862e3d0a775f18c7cfe02273500ae307b61218",
