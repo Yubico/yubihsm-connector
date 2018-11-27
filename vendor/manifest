@@ -40,6 +40,18 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/kardianos/osext",
+			"repository": "https://github.com/kardianos/osext",
+			"revision": "ae77be60afb1dcacde03767a8c37337fad28ac14",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/kardianos/service",
+			"repository": "https://github.com/kardianos/service",
+			"revision": "b1866cf76903d81b491fb668ba14f4b1322b2ca7",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/magiconair/properties",
 			"repository": "https://github.com/magiconair/properties",
 			"revision": "2c9e9502788518c97fe44e8955cd069417ee89df",
