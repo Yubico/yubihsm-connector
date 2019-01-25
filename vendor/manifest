@@ -48,7 +48,7 @@
 		{
 			"importpath": "github.com/kardianos/service",
 			"repository": "https://github.com/kardianos/service",
-			"revision": "b1866cf76903d81b491fb668ba14f4b1322b2ca7",
+			"revision": "4c239ee84e7bb93441b1b6a3f2db62d40e0e6cbd",
 			"branch": "master"
 		},
 		{
