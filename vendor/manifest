@@ -40,6 +40,18 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/kardianos/osext",
+			"repository": "https://github.com/kardianos/osext",
+			"revision": "ae77be60afb1dcacde03767a8c37337fad28ac14",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/kardianos/service",
+			"repository": "https://github.com/kardianos/service",
+			"revision": "4c239ee84e7bb93441b1b6a3f2db62d40e0e6cbd",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/magiconair/properties",
 			"repository": "https://github.com/magiconair/properties",
 			"revision": "2c9e9502788518c97fe44e8955cd069417ee89df",
@@ -123,13 +135,6 @@
 			"revision": "bbed4ca2a465660f336e1e5a4b2fe549667a2ca1",
 			"branch": "master",
 			"path": "/usb"
-		},
-		{
-			"importpath": "github.com/ugorji/go/codec",
-			"repository": "https://github.com/ugorji/go",
-			"revision": "f3cacc17c85ecb7f1b6a9e373ee85d1480919868",
-			"branch": "master",
-			"path": "/codec"
 		},
 		{
 			"importpath": "github.com/xordataexchange/crypt/backend",
