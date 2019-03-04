@@ -33,17 +33,14 @@ vet:
 test: vet
 	@gb test ${GB_BUILD_FLAGS} -v
 
+docker-clean:
+	@docker rmi yubico/yubihsm-connector
+
 docker-build:
-	@docker build -f Dockerfile.build -t yubico:yubihsm-connector-build .
+	@docker build -t yubico/yubihsm-connector -f Dockerfile .
 
-docker-build-run: docker-build
-	@docker run --rm -v ${PWD}:/yubihsm-connector yubico:yubihsm-connector-build
-
-docker: docker-build
-	@docker build -f Dockerfile -t yubico:yubihsm-connector .
-
-docker-run: docker
-	@docker run --rm --privileged -v /dev/bus/usb/:/dev/bus/usb/ -p 12345:12345 yubico:yubihsm-connector
+docker-run:
+	@docker run --rm -it --privileged -v ${PWD}:/yubihsm-connector -v /dev/bus/usb/:/dev/bus/usb/ -p 12345:12345 yubico/yubihsm-connector
 
 clean:
 	@rm -rf bin/* pkg/* src/yubihsm-connector/*.syso \
