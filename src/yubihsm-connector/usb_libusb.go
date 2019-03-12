@@ -73,11 +73,10 @@ func usbopen(cid string) (err error) {
 		if serial != "" && serial != serialnumber {
 			log.WithFields(fields).Debug("Device skipped for non-matching serial")
 			dev.Close()
-			continue
+		} else {
+			log.WithFields(fields).Debug("Returning a matched device")
+			state.device = dev
 		}
-		log.WithFields(fields).Debug("Returning a matched device")
-		state.device = dev
-		break
 	}
 	if state.device == nil {
 		err = fmt.Errorf("device not found")
