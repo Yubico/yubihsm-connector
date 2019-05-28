@@ -1,4 +1,4 @@
-FROM golang:1.9.4-stretch AS build
+FROM golang:1.11.10-stretch AS build
 
 COPY . /usr/lib/src/yubihsm-connector
 
@@ -13,8 +13,6 @@ RUN apt-get install -y curl \
 		libusb-1.0.0-dev
 
 WORKDIR /usr/lib/src/yubihsm-connector
-
-RUN go get github.com/constabulary/gb/...
 
 RUN pwd
 

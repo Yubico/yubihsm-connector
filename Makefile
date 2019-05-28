@@ -7,8 +7,8 @@ MAKEFLAGS += --no-builtin-rules
 all: build
 
 build:
-	@gb generate ${GB_GEN_FLAGS}
-	@gb build ${GB_BUILD_FLAGS}
+	@go generate ${GB_GEN_FLAGS} ./...
+	@go build -o bin/yubihsm-connector ${GB_GEN_FLAGS} ./...
 
 rebuild: clean build
 
@@ -31,7 +31,7 @@ vet:
 	@go vet ./src/...
 
 test: vet
-	@gb test ${GB_BUILD_FLAGS} -v
+	@go test -v ${GB_GEN_FLAGS} ./...
 
 docker-clean:
 	@docker rmi yubico/yubihsm-connector
