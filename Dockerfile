@@ -1,4 +1,4 @@
-FROM golang:1.11.10-stretch AS build
+FROM golang:1.12-stretch AS build
 
 COPY . /usr/lib/src/yubihsm-connector
 

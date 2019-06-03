@@ -26,25 +26,18 @@ Use "yubihsm-connector [command] --help" for more information about a command.
 
 === Dependencies
 
-- link:https://golang.org[golang (>= 1.8, < 1.12)]
-- link:https://getgb.io[gb]
+- link:https://golang.org[golang (>=1.11)]
 - link:https://pre-commit.com[pre-commit]
 - link:https://libusb.info[libusb-1.0]
 
 === Vendor code
 
-The vendor code is handled using "gb vendor" and it is using the vendor/manifest file.
+The vendor code is handled using "go mod vendor".
 
 To list vendor code:
 
 ....
-$ gb vendor list
-....
-
-To update all:
-
-....
-$ gb vendor update --all
+$ go list -m all
 ....
 
 === pre-commit
