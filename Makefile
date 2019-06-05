@@ -6,8 +6,10 @@ MAKEFLAGS += --no-builtin-rules
 
 all: build
 
-build:
+gen:
 	@go generate -mod=vendor ./...
+
+build: gen
 	@go build -mod=vendor -o bin/yubihsm-connector ./...
 
 rebuild: clean build
@@ -27,7 +29,7 @@ srun: cert build
 fmt:
 	@go fmt ./src/...
 
-vet:
+vet: gen
 	@go vet ./src/...
 
 test: vet
