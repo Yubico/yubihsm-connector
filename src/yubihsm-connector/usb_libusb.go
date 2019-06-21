@@ -17,8 +17,10 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/google/gousb"
 	log "github.com/sirupsen/logrus"
@@ -104,7 +106,7 @@ func usbopen(cid string) (err error) {
 		goto out
 	}
 
-	usbread(cid)
+	usbread(cid, 1*time.Millisecond)
 
 	return nil
 
@@ -180,11 +182,18 @@ out:
 	return err
 }
 
-func usbread(cid string) (buf []byte, err error) {
+func usbread(cid string, timeout time.Duration) (buf []byte, err error) {
 	var n int
+	var ctx context.Context
 
 	buf = make([]byte, 8192)
-	if n, err = state.rendpoint.Read(buf); err != nil {
+	ctx = context.Background()
+	if timeout > 0 {
+		var cancel func()
+		ctx, cancel = context.WithTimeout(ctx, timeout)
+		defer cancel()
+	}
+	if n, err = state.rendpoint.ReadContext(ctx, buf); err != nil {
 		buf = buf[:0]
 		goto out
 	}
@@ -220,7 +229,7 @@ func usbProxy(req []byte, cid string) (resp []byte, err error) {
 			continue
 		}
 
-		resp, err = usbread(cid)
+		resp, err = usbread(cid, 0)
 		switch err {
 		case gousb.ErrorNoDevice, gousb.ErrorNotFound:
 			if err = usbreopen(cid, err); err != nil {
