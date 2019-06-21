@@ -20,15 +20,17 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/google/gousb"
 	log "github.com/sirupsen/logrus"
-	"github.com/thorduri/go-libusb/usb"
 )
 
 var state struct {
-	ctx       *usb.Context
-	device    *usb.Device
-	wendpoint usb.Endpoint
-	rendpoint usb.Endpoint
+	ctx       *gousb.Context
+	device    *gousb.Device
+	config    *gousb.Config
+	iface     *gousb.Interface
+	wendpoint *gousb.OutEndpoint
+	rendpoint *gousb.InEndpoint
 
 	mtx sync.Mutex
 }
@@ -36,7 +38,7 @@ var state struct {
 func usbopen(cid string) (err error) {
 	if state.ctx == nil {
 		log.WithField("Correlation-ID", cid).Debug("usb context not yet open")
-		state.ctx = usb.NewContext()
+		state.ctx = gousb.NewContext()
 		if state.ctx == nil {
 			return fmt.Errorf("unable to create a usb context")
 		}
@@ -46,8 +48,8 @@ func usbopen(cid string) (err error) {
 		return nil
 	}
 
-	var devs []*usb.Device
-	devs, err = state.ctx.ListDevices(func(desc *usb.Descriptor) bool {
+	var devs []*gousb.Device
+	devs, err = state.ctx.OpenDevices(func(desc *gousb.DeviceDesc) bool {
 		if desc.Vendor == 0x1050 && desc.Product == 0x0030 {
 			return true
 		}
@@ -58,9 +60,7 @@ func usbopen(cid string) (err error) {
 	}
 
 	for _, dev := range devs {
-		serialnumber := ""
-		idx := int(dev.Descriptor.ISerialNumber)
-		serialnumber, err = dev.GetStringDescriptor(idx)
+		serialnumber, err := dev.SerialNumber()
 		if err != nil {
 			dev.Close()
 			continue
@@ -82,23 +82,29 @@ func usbopen(cid string) (err error) {
 		err = fmt.Errorf("device not found")
 		goto out
 	}
-	state.device.ReadTimeout = 0
-	state.device.WriteTimeout = 0
 	state.device.ControlTimeout = 0
 
-	state.wendpoint, err = state.device.OpenEndpoint(1, 0, 0, 0x1)
+	state.config, err = state.device.Config(1)
 	if err != nil {
 		goto out
 	}
 
-	state.rendpoint, err = state.device.OpenEndpoint(1, 0, 0, 0x81)
+	state.iface, err = state.config.Interface(0, 0)
 	if err != nil {
 		goto out
 	}
 
-	state.device.ReadTimeout = 1000000
+	state.wendpoint, err = state.iface.OutEndpoint(0x1)
+	if err != nil {
+		goto out
+	}
+
+	state.rendpoint, err = state.iface.InEndpoint(0x81)
+	if err != nil {
+		goto out
+	}
+
 	usbread(cid)
-	state.device.ReadTimeout = 0
 
 	return nil
 
@@ -108,6 +114,14 @@ out:
 }
 
 func usbclose(cid string) {
+	if state.iface != nil {
+		state.iface.Close()
+		state.iface = nil
+	}
+	if state.config != nil {
+		state.config.Close()
+		state.config = nil
+	}
 	if state.device != nil {
 		state.device.Close()
 		state.device = nil
@@ -199,7 +213,7 @@ func usbProxy(req []byte, cid string) (resp []byte, err error) {
 	for {
 		err = usbwrite(req, cid)
 		switch err {
-		case usb.ERROR_NO_DEVICE, usb.ERROR_NOT_FOUND:
+		case gousb.ErrorNoDevice, gousb.ErrorNotFound:
 			if err = usbreopen(cid, err); err != nil {
 				return nil, err
 			}
@@ -208,7 +222,7 @@ func usbProxy(req []byte, cid string) (resp []byte, err error) {
 
 		resp, err = usbread(cid)
 		switch err {
-		case usb.ERROR_NO_DEVICE, usb.ERROR_NOT_FOUND:
+		case gousb.ErrorNoDevice, gousb.ErrorNotFound:
 			if err = usbreopen(cid, err); err != nil {
 				return nil, err
 			}

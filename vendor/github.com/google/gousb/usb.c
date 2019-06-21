@@ -1,4 +1,5 @@
 // Copyright 2013 Google Inc.  All rights reserved.
+// Copyright 2018 the gousb Authors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,25 +13,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package usb
+#include <libusb.h>
 
-// To enable internal debugging:
-//   -ldflags "-X github.com/thorduri/go-libusb/usb.debugInternal true"
-
-import (
-	"io"
-	"io/ioutil"
-	"log" // TODO(kevlar): make a logger
-	"os"
-)
-
-var debug *log.Logger
-var debugInternal string
-
-func init() {
-	var out io.Writer = ioutil.Discard
-	if debugInternal != "" {
-		out = os.Stderr
-	}
-	debug = log.New(out, "usb", log.LstdFlags|log.Lshortfile)
+void gousb_set_debug(libusb_context *ctx, int lvl) {
+    // TODO(sebek): remove libusb_debug entirely in 2.1 or 3.0,
+    // require libusb >= 1.0.22. libusb 1.0.22 sets API version 0x01000106.
+#if LIBUSB_API_VERSION >= 0x01000106
+    libusb_set_option(ctx, LIBUSB_OPTION_LOG_LEVEL, lvl);
+#else
+    libusb_set_debug(ctx, lvl);
+#endif
 }
