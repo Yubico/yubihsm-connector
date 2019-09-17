@@ -1,4 +1,5 @@
 // Copyright 2013 Google Inc.  All rights reserved.
+// Copyright 2016 the gousb Authors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,36 +13,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package usb
+package gousb
+
+// To enable internal debugging, set the GOUSB_DEBUG environment variable.
 
 import (
-	"fmt"
+	"io"
+	"io/ioutil"
+	"log" // TODO(kevlar): make a logger
+	"os"
 )
 
-type BCD uint16
+var debug *log.Logger
 
-const (
-	USB_2_0 BCD = 0x0200
-	USB_1_1 BCD = 0x0110
-	USB_1_0 BCD = 0x0100
-)
+const debugEnvVarName = "GOUSB_DEBUG"
 
-func (d BCD) Int() (i int) {
-	ten := 1
-	for o := uint(0); o < 4; o++ {
-		n := ((0xF << (o * 4)) & d) >> (o * 4)
-		i += int(n) * ten
-		ten *= 10
+func init() {
+	out := io.Writer(ioutil.Discard)
+	if os.Getenv(debugEnvVarName) != "" {
+		out = os.Stderr
 	}
-	return
-}
-
-func (d BCD) String() string {
-	return fmt.Sprintf("%02x.%02x", int(d>>8), int(d&0xFF))
-}
-
-type ID uint16
-
-func (id ID) String() string {
-	return fmt.Sprintf("%04x", int(id))
+	debug = log.New(out, "gousb: ", log.LstdFlags|log.Lshortfile)
 }

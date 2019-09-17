@@ -1,5 +1,7 @@
 # github.com/fsnotify/fsnotify v1.4.7
 github.com/fsnotify/fsnotify
+# github.com/google/gousb v0.0.0-20190812193832-18f4c1d8a750
+github.com/google/gousb
 # github.com/hashicorp/hcl v0.0.0-20180404174102-ef8a98b0bbce
 github.com/hashicorp/hcl
 github.com/hashicorp/hcl/hcl/printer
@@ -41,8 +43,6 @@ github.com/spf13/jwalterweatherman
 github.com/spf13/pflag
 # github.com/spf13/viper v0.0.0-20180404183325-8dc2790b029d
 github.com/spf13/viper
-# github.com/thorduri/go-libusb v0.0.0-20170313131533-bbed4ca2a465
-github.com/thorduri/go-libusb/usb
 # golang.org/x/crypto v0.0.0-20180425071531-b0697eccbea9
 golang.org/x/crypto/ssh/terminal
 # golang.org/x/sys v0.0.0-20180420145319-79b0c6888797
