@@ -27,10 +27,10 @@ srun: cert build
 	@./bin/yubihsm-connector -d --cert=var/cert.crt --key=var/cert.key
 
 fmt:
-	@go fmt ./src/...
+	@go fmt ./...
 
 vet: gen
-	@go vet ./src/...
+	@go vet ./...
 
 test: vet
 	@go test -v ./...
@@ -45,8 +45,6 @@ docker-run:
 	@docker run --rm -it --privileged -v ${PWD}:/yubihsm-connector -v /dev/bus/usb/:/dev/bus/usb/ -p 12345:12345 yubico/yubihsm-connector
 
 clean:
-	@rm -rf bin/* pkg/* src/yubihsm-connector/*.syso \
-		src/yubihsm-connector/versioninfo.json \
-		src/yubihsm-connector/version.go
+	@rm -rf bin/* pkg/* *.syso versioninfo.json version.go
 
 .PHONY: all build fmt vet test clean version

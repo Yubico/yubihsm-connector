@@ -43,7 +43,7 @@ func main() {
 
 	// Read JSON version file
 
-	raw_version, err := ioutil.ReadFile("../../VERSION")
+	raw_version, err := ioutil.ReadFile("./VERSION")
 	die(err)
 
 	var vi VersionInput
