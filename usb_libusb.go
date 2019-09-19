@@ -86,6 +86,13 @@ func usbopen(cid string) (err error) {
 	}
 	state.device.ControlTimeout = 0
 
+	if err = state.device.Reset(); err != nil {
+		log.WithField(
+			"Correlation-ID", cid,
+		).WithError(err).Error("unable to reset device")
+		goto out
+	}
+
 	state.config, err = state.device.Config(1)
 	if err != nil {
 		goto out
@@ -135,16 +142,6 @@ func usbreopen(cid string, why error) (err error) {
 		"Correlation-ID": cid,
 		"why":            why,
 	}).Debug("reopening usb context")
-
-	// If the first request to the connector is a status request,
-	// the device context might not have been created yet.
-	if state.device != nil {
-		if err = state.device.Reset(); err != nil {
-			log.WithField(
-				"Correlation-ID", cid,
-			).WithError(err).Error("unable to reset device")
-		}
-	}
 
 	usbclose(cid)
 	return usbopen(cid)
