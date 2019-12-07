@@ -24,6 +24,7 @@ import (
 	"runtime"
 	"strings"
 	"syscall"
+	"time"
 
 	yaml "gopkg.in/yaml.v2"
 
@@ -51,9 +52,14 @@ type program struct {
 func (p *program) Start(s service.Service) error {
 	addr := viper.GetString("listen")
 	p.srv = &http.Server{Addr: addr}
+	timeout := timeoutToMs(viper.GetUint32("timeout"))
 
-	http.HandleFunc("/connector/status", middlewareWrapper(statusHandler))
-	http.HandleFunc("/connector/api", middlewareWrapper(apiHandler))
+	http.HandleFunc("/connector/status", middlewareWrapper(func(w http.ResponseWriter, r *http.Request) {
+		statusHandler(w, r, timeout)
+	}))
+	http.HandleFunc("/connector/api", middlewareWrapper(func(w http.ResponseWriter, r *http.Request) {
+		apiHandler(w, r, timeout)
+	}))
 
 	if viper.GetBool("seccomp") {
 		log.Warn("seccomp support has been deprecated and the flag will be removed in future versions")
@@ -175,6 +181,7 @@ func main() {
 				"version": Version.String(),
 				"cert":    viper.GetString("cert"),
 				"key":     viper.GetString("key"),
+				"timeout": timeoutToMs(viper.GetUint32("timeout")),
 				"serial":  serial,
 			}).Debug("preflight complete")
 
@@ -204,6 +211,8 @@ func main() {
 	viper.BindPFlag("enable-host-whitelist", rootCmd.PersistentFlags().Lookup("enable-host-header-whitelist"))
 	rootCmd.PersistentFlags().StringSliceVar(&hostHeaderWhitelist, "host-header-whitelist", hostHeaderWhitelist, "Host header whitelist")
 	viper.BindPFlag("host-whitelist", rootCmd.PersistentFlags().Lookup("host-header-whitelist"))
+	rootCmd.PersistentFlags().Uint32P("timeout", "t", 0, "USB operation timeout in milliseconds (default 0, never timeout)")
+	viper.BindPFlag("timeout", rootCmd.PersistentFlags().Lookup("timeout"))
 
 	configCmd := &cobra.Command{
 		Use: "config",
@@ -346,4 +355,8 @@ func ensureSerial(s string) (string, error) {
 	}
 
 	return s, nil
+}
+
+func timeoutToMs(t uint32) time.Duration {
+	return time.Duration(t) * time.Millisecond
 }

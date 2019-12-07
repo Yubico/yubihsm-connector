@@ -19,6 +19,7 @@ package main
 import (
 	"fmt"
 	"sync"
+	"time"
 	"unsafe"
 
 	log "github.com/sirupsen/logrus"
@@ -58,19 +59,20 @@ func winusbError(err error) error {
 	return nil
 }
 
-func usbopen(cid string) (err error) {
+func usbopen(cid string, timeout time.Duration) (err error) {
 	if device.ctx != nil {
 		log.WithField("Correlation-ID", cid).Debug("usb context already open")
 		return nil
 	}
 
+	ms := C.ulong(uint32(timeout.Milliseconds()))
 	if serial != "" {
 		cSerial := C.CString(serial)
 		defer C.free(unsafe.Pointer(cSerial))
 
-		err = winusbError(C.usbOpen(0x1050, 0x0030, cSerial, &device.ctx))
+		err = winusbError(C.usbOpen(0x1050, 0x0030, cSerial, &device.ctx, ms))
 	} else {
-		err = winusbError(C.usbOpen(0x1050, 0x0030, nil, &device.ctx))
+		err = winusbError(C.usbOpen(0x1050, 0x0030, nil, &device.ctx, ms))
 	}
 
 	if device.ctx == nil {
@@ -86,7 +88,7 @@ func usbclose(cid string) {
 	}
 }
 
-func usbreopen(cid string, why error) (err error) {
+func usbreopen(cid string, why error, timeout time.Duration) (err error) {
 	log.WithFields(log.Fields{
 		"Correlation-ID": cid,
 		"why":            why,
@@ -103,14 +105,14 @@ func usbreopen(cid string, why error) (err error) {
 	}
 
 	usbclose(cid)
-	return usbopen(cid)
+	return usbopen(cid, timeout)
 }
 
-func usbReopen(cid string, why error) (err error) {
+func usbReopen(cid string, why error, timeout time.Duration) (err error) {
 	device.mtx.Lock()
 	defer device.mtx.Unlock()
 
-	return usbreopen(cid, why)
+	return usbreopen(cid, why, timeout)
 }
 
 func usbwrite(buf []byte, cid string) (err error) {
@@ -174,11 +176,11 @@ out:
 	return buf, err
 }
 
-func usbProxy(req []byte, cid string) (resp []byte, err error) {
+func usbProxy(req []byte, cid string, timeout time.Duration) (resp []byte, err error) {
 	device.mtx.Lock()
 	defer device.mtx.Unlock()
 
-	if err = usbopen(cid); err != nil {
+	if err = usbopen(cid, timeout); err != nil {
 		return nil, err
 	}
 
@@ -186,7 +188,7 @@ func usbProxy(req []byte, cid string) (resp []byte, err error) {
 		err = usbwrite(req, cid)
 		switch err {
 		case ERROR_INVALID_STATE, ERROR_INVALID_HANDLE, ERROR_BAD_COMMAND:
-			if err = usbreopen(cid, err); err != nil {
+			if err = usbreopen(cid, err, timeout); err != nil {
 				return nil, err
 			}
 			continue
@@ -195,7 +197,7 @@ func usbProxy(req []byte, cid string) (resp []byte, err error) {
 		resp, err = usbread(cid)
 		switch err {
 		case ERROR_INVALID_STATE, ERROR_INVALID_HANDLE, ERROR_BAD_COMMAND:
-			if err = usbreopen(cid, err); err != nil {
+			if err = usbreopen(cid, err, timeout); err != nil {
 				return nil, err
 			}
 			continue

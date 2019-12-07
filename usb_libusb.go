@@ -154,15 +154,22 @@ func usbReopen(cid string, why error) (err error) {
 	return usbreopen(cid, why)
 }
 
-func usbwrite(buf []byte, cid string) (err error) {
+func usbwrite(buf []byte, cid string, timeout time.Duration) (err error) {
 	var n int
+	var ctx context.Context
 
-	if n, err = state.wendpoint.Write(buf); err != nil {
+	ctx = context.Background()
+	if timeout > 0 {
+		var cancel func()
+		ctx, cancel = context.WithTimeout(ctx, timeout)
+		defer cancel()
+	}
+	if n, err = state.wendpoint.WriteContext(ctx, buf); err != nil {
 		goto out
 	}
 	if len(buf)%64 == 0 {
 		var empty []byte
-		if n, err = state.wendpoint.Write(empty); err != nil {
+		if n, err = state.wendpoint.WriteContext(ctx, empty); err != nil {
 			goto out
 		}
 	}
@@ -208,7 +215,7 @@ out:
 	return buf, err
 }
 
-func usbProxy(req []byte, cid string) (resp []byte, err error) {
+func usbProxy(req []byte, cid string, timeout time.Duration) (resp []byte, err error) {
 	state.mtx.Lock()
 	defer state.mtx.Unlock()
 
@@ -217,7 +224,7 @@ func usbProxy(req []byte, cid string) (resp []byte, err error) {
 	}
 
 	for {
-		err = usbwrite(req, cid)
+		err = usbwrite(req, cid, timeout)
 		switch err {
 		case gousb.ErrorNoDevice, gousb.ErrorNotFound:
 			if err = usbreopen(cid, err); err != nil {
@@ -226,7 +233,7 @@ func usbProxy(req []byte, cid string) (resp []byte, err error) {
 			continue
 		}
 
-		resp, err = usbread(cid, 0)
+		resp, err = usbread(cid, timeout)
 		switch err {
 		case gousb.ErrorNoDevice, gousb.ErrorNotFound:
 			if err = usbreopen(cid, err); err != nil {

@@ -125,7 +125,7 @@ func middlewareWrapper(next http.HandlerFunc) http.HandlerFunc {
 	})
 }
 
-func statusHandler(w http.ResponseWriter, r *http.Request) {
+func statusHandler(w http.ResponseWriter, r *http.Request, timeout time.Duration) {
 	var err error
 
 	if r.Method != "GET" {
@@ -141,7 +141,7 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 	})
 
 	var status string
-	if err = usbReopen(cid, fmt.Errorf("status request")); err != nil {
+	if err = usbReopen(cid, fmt.Errorf("status request"), timeout); err != nil {
 		status = "NO_DEVICE"
 		clog.WithError(err).Warn("status failed to open usb device")
 	} else {
@@ -164,7 +164,7 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "port=%s\n", split[1])
 }
 
-func apiHandler(w http.ResponseWriter, r *http.Request) {
+func apiHandler(w http.ResponseWriter, r *http.Request, timeout time.Duration) {
 	var buf []byte
 	var n int
 	var err error
@@ -188,7 +188,7 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if buf, err = usbProxy(buf, cid); err != nil {
+	if buf, err = usbProxy(buf, cid, timeout); err != nil {
 		clog.WithError(err).Error("failed usb proxy")
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)

@@ -256,7 +256,7 @@ Cleanup:
     return error == ERROR_SUCCESS;
 }
 
-static DWORD GetUsbDevice(int vendorId, int productId, char* serialNumber, PDEVICE_CONTEXT ctx)
+static DWORD GetUsbDevice(int vendorId, int productId, char* serialNumber, PDEVICE_CONTEXT ctx, ULONG confTimeout)
 {
     HANDLE                           deviceHandle    = INVALID_HANDLE_VALUE;
     SP_DEVINFO_DATA                  deviceInfoData  = { sizeof(SP_DEVINFO_DATA) };
@@ -356,7 +356,7 @@ static DWORD GetUsbDevice(int vendorId, int productId, char* serialNumber, PDEVI
             // we don't really care about what happens to this read request..
             WinUsb_ReadPipe(interfaceHandle, PIPE_READ, buf, sizeof(buf), &transferred, 0);
 
-            timeout = 0;
+            timeout = confTimeout;
             if (!WinUsb_SetPipePolicy(interfaceHandle, PIPE_READ, PIPE_TRANSFER_TIMEOUT,
                     sizeof(timeout), &timeout)) {
                 error = GetLastError();
@@ -389,7 +389,7 @@ Cleanup:
     return error;
 }
 
-DWORD usbOpen(int vendorId, int productId, char* serialNumber, PDEVICE_CONTEXT* device)
+DWORD usbOpen(int vendorId, int productId, char* serialNumber, PDEVICE_CONTEXT* device, ULONG timeout)
 {
     PDEVICE_CONTEXT ctx   = NULL;
     DWORD           error = ERROR_SUCCESS;
@@ -415,7 +415,7 @@ DWORD usbOpen(int vendorId, int productId, char* serialNumber, PDEVICE_CONTEXT* 
     ctx->writePipe    = 0;
     ctx->initialized  = FALSE;
 
-    error = GetUsbDevice(vendorId, productId, serialNumber, ctx);
+    error = GetUsbDevice(vendorId, productId, serialNumber, ctx, timeout);
     if (error != ERROR_SUCCESS)
     {
         printf("GetUsbDevice returned 0x%x\n", error);
