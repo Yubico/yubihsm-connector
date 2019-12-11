@@ -57,7 +57,12 @@ func usbopen(cid string) (err error) {
 		}
 		return false
 	})
-	if err != nil {
+
+	// If len(devs) > 0 we're happy even if there are errors, because
+	// gousb will try to open all the devices that match, but will also
+	// return the last of any error encountered when interacting with
+	// *any* device, even the ones we're not interested in.
+	if len(devs) == 0 && err != nil {
 		goto out
 	}
 
