@@ -160,6 +160,7 @@ func usbread(cid string) (buf []byte, err error) {
 		(*C.UCHAR)(unsafe.Pointer(&buf[0])),
 		C.ULONG(len(buf)),
 		&n)); err != nil {
+		buf = buf[:0]
 		goto out
 	}
 	buf = buf[:n]
