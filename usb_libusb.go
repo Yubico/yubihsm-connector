@@ -69,6 +69,11 @@ func usbopen(cid string, serial string) (err error) {
 	for _, dev := range devs {
 		serialnumber, err := dev.SerialNumber()
 		if err != nil {
+			log.WithFields(log.Fields{
+				"Correlation-ID": cid,
+				"Device":         dev,
+			}).Debug("Couldn't read serial number from device")
+
 			dev.Close()
 			continue
 		}
