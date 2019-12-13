@@ -82,6 +82,11 @@ func usbopen(cid string, serial string) (err error) {
 			dev.Close()
 		} else {
 			log.WithFields(fields).Debug("Returning a matched device")
+			if state.device != nil {
+				// A new matching device will override the previously selected
+				// one, close the one we're overriding.
+				state.device.Close()
+			}
 			state.device = dev
 		}
 	}
