@@ -335,6 +335,8 @@ static DWORD GetUsbDevice(int vendorId, int productId, char* serialNumber, PDEVI
 
         if (!IsMatchingDevice(interfaceHandle, vendorId, productId, serialNumber))
         {
+            // Set an error in case this is the last iteration of the loop.
+            error = ERROR_OBJECT_NOT_FOUND;
             continue;
         }
 
@@ -366,6 +368,10 @@ static DWORD GetUsbDevice(int vendorId, int productId, char* serialNumber, PDEVI
 
         // Device found, break out of loop and return it.
         break;
+    }
+    if (error != ERROR_SUCCESS) {
+        // We exited the loop above while in an error state, we need to clean up.
+        goto Cleanup;
     }
 
     ctx->deviceHandle = deviceHandle;
