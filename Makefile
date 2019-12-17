@@ -7,10 +7,10 @@ MAKEFLAGS += --no-builtin-rules
 all: build
 
 gen:
-	@go generate -mod=vendor ./...
+	@go generate -mod=vendor
 
 build: gen
-	@go build -mod=vendor -o bin/yubihsm-connector ./...
+	@go build -mod=vendor -o bin/yubihsm-connector
 
 rebuild: clean build
 
@@ -27,13 +27,13 @@ srun: cert build
 	@./bin/yubihsm-connector -d --cert=var/cert.crt --key=var/cert.key
 
 fmt:
-	@go fmt ./...
+	@go fmt
 
 vet: gen
-	@go vet ./...
+	@go vet
 
 test: vet
-	@go test -v ./...
+	@go test -v
 
 docker-clean:
 	@docker rmi yubico/yubihsm-connector
