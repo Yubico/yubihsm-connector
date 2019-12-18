@@ -18,6 +18,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"sync"
 	"time"
 	"unsafe"
@@ -65,7 +66,12 @@ func usbopen(cid string, timeout time.Duration, serial string) (err error) {
 		return nil
 	}
 
-	ms := C.ulong(uint32(timeout.Milliseconds()))
+	var timeoutMs int64 = timeout.Milliseconds()
+	if (timeoutMs > math.MaxUint32) {
+		log.Fatalf("timeout must fit in a uint32")
+	}
+
+	var ms C.ULONG = C.ulong(uint32(timeoutMs))
 	if serial != "" {
 		cSerial := C.CString(serial)
 		defer C.free(unsafe.Pointer(cSerial))
