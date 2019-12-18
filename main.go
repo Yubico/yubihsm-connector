@@ -37,9 +37,6 @@ import (
 )
 
 var (
-	// XXX(thorduri): Barf.
-	serial string
-
 	// Host header whitelisting
 	hostHeaderWhitelisting bool
 	hostHeaderWhitelist    = []string{"localhost", "localhost.", "127.0.0.1", "[::1]"}
@@ -53,12 +50,13 @@ func (p *program) Start(s service.Service) error {
 	addr := viper.GetString("listen")
 	p.srv = &http.Server{Addr: addr}
 	timeout := timeoutToMs(viper.GetUint32("timeout"))
+	serial := viper.GetString("serial") // already validated by Cobra
 
 	http.HandleFunc("/connector/status", middlewareWrapper(func(w http.ResponseWriter, r *http.Request) {
-		statusHandler(w, r, timeout)
+		statusHandler(w, r, timeout, serial)
 	}))
 	http.HandleFunc("/connector/api", middlewareWrapper(func(w http.ResponseWriter, r *http.Request) {
-		apiHandler(w, r, timeout)
+		apiHandler(w, r, timeout, serial)
 	}))
 
 	if viper.GetBool("seccomp") {
@@ -167,8 +165,7 @@ func main() {
 				return certkeyErr
 			}
 
-			// XXX(thorduri): Barf.
-			serial, err = ensureSerial(viper.GetString("serial"))
+			serial, err := ensureSerial(viper.GetString("serial"))
 			if err != nil {
 				return err
 			}

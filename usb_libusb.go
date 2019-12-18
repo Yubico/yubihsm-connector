@@ -37,7 +37,7 @@ var state struct {
 	mtx sync.Mutex
 }
 
-func usbopen(cid string) (err error) {
+func usbopen(cid string, serial string) (err error) {
 	if state.ctx == nil {
 		log.WithField("Correlation-ID", cid).Debug("usb context not yet open")
 		state.ctx = gousb.NewContext()
@@ -142,21 +142,21 @@ func usbclose(cid string) {
 	}
 }
 
-func usbreopen(cid string, why error) (err error) {
+func usbreopen(cid string, why error, serial string) (err error) {
 	log.WithFields(log.Fields{
 		"Correlation-ID": cid,
 		"why":            why,
 	}).Debug("reopening usb context")
 
 	usbclose(cid)
-	return usbopen(cid)
+	return usbopen(cid, serial)
 }
 
-func usbReopen(cid string, why error) (err error) {
+func usbReopen(cid string, why error, serial string, timeout time.Duration) (err error) {
 	state.mtx.Lock()
 	defer state.mtx.Unlock()
 
-	return usbreopen(cid, why)
+	return usbreopen(cid, why, serial)
 }
 
 func usbwrite(buf []byte, cid string, timeout time.Duration) (err error) {
@@ -220,11 +220,11 @@ out:
 	return buf, err
 }
 
-func usbProxy(req []byte, cid string, timeout time.Duration) (resp []byte, err error) {
+func usbProxy(req []byte, cid string, timeout time.Duration, serial string) (resp []byte, err error) {
 	state.mtx.Lock()
 	defer state.mtx.Unlock()
 
-	if err = usbopen(cid); err != nil {
+	if err = usbopen(cid, serial); err != nil {
 		return nil, err
 	}
 
@@ -232,7 +232,7 @@ func usbProxy(req []byte, cid string, timeout time.Duration) (resp []byte, err e
 		err = usbwrite(req, cid, timeout)
 		switch err {
 		case gousb.ErrorNoDevice, gousb.ErrorNotFound:
-			if err = usbreopen(cid, err); err != nil {
+			if err = usbreopen(cid, err, serial); err != nil {
 				return nil, err
 			}
 			continue
@@ -241,7 +241,7 @@ func usbProxy(req []byte, cid string, timeout time.Duration) (resp []byte, err e
 		resp, err = usbread(cid, timeout)
 		switch err {
 		case gousb.ErrorNoDevice, gousb.ErrorNotFound:
-			if err = usbreopen(cid, err); err != nil {
+			if err = usbreopen(cid, err, serial); err != nil {
 				return nil, err
 			}
 			continue

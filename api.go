@@ -125,7 +125,7 @@ func middlewareWrapper(next http.HandlerFunc) http.HandlerFunc {
 	})
 }
 
-func statusHandler(w http.ResponseWriter, r *http.Request, timeout time.Duration) {
+func statusHandler(w http.ResponseWriter, r *http.Request, timeout time.Duration, serial string) {
 	var err error
 
 	if r.Method != "GET" {
@@ -141,7 +141,7 @@ func statusHandler(w http.ResponseWriter, r *http.Request, timeout time.Duration
 	})
 
 	var status string
-	if err = usbReopen(cid, fmt.Errorf("status request"), timeout); err != nil {
+	if err = usbReopen(cid, fmt.Errorf("status request"), serial, timeout); err != nil {
 		status = "NO_DEVICE"
 		clog.WithError(err).Warn("status failed to open usb device")
 	} else {
@@ -152,7 +152,6 @@ func statusHandler(w http.ResponseWriter, r *http.Request, timeout time.Duration
 	split := strings.Split(viper.GetString("listen"), ":")
 
 	fmt.Fprintf(w, "status=%s\n", status)
-	// XXX(thorduri): Barf.
 	if serial == "" {
 		fmt.Fprintf(w, "serial=*\n")
 	} else {
@@ -164,7 +163,7 @@ func statusHandler(w http.ResponseWriter, r *http.Request, timeout time.Duration
 	fmt.Fprintf(w, "port=%s\n", split[1])
 }
 
-func apiHandler(w http.ResponseWriter, r *http.Request, timeout time.Duration) {
+func apiHandler(w http.ResponseWriter, r *http.Request, timeout time.Duration, serial string) {
 	var buf []byte
 	var n int
 	var err error
@@ -188,7 +187,7 @@ func apiHandler(w http.ResponseWriter, r *http.Request, timeout time.Duration) {
 		return
 	}
 
-	if buf, err = usbProxy(buf, cid, timeout); err != nil {
+	if buf, err = usbProxy(buf, cid, timeout, serial); err != nil {
 		clog.WithError(err).Error("failed usb proxy")
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
