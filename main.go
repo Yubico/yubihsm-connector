@@ -50,7 +50,7 @@ func (p *program) Start(s service.Service) error {
 	addr := viper.GetString("listen")
 	p.srv = &http.Server{Addr: addr}
 	timeout := timeoutToMs(viper.GetUint32("timeout"))
-	serial := viper.GetString("serial") // already validated by Cobra
+	serial, _ := ensureSerial(viper.GetString("serial")) // already validated by Cobra
 
 	http.HandleFunc("/connector/status", middlewareWrapper(func(w http.ResponseWriter, r *http.Request) {
 		statusHandler(w, r, timeout, serial)
