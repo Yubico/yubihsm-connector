@@ -44,6 +44,9 @@ type statusReponse struct {
 }
 
 func (r *statusReponse) Write(p []byte) (int, error) {
+	if r.status == 0 {
+		r.WriteHeader(http.StatusOK)
+	}
 	return r.ResponseWriter.Write(p)
 }
 
@@ -107,10 +110,6 @@ func middlewareWrapper(next http.HandlerFunc) http.HandlerFunc {
 		now := time.Now()
 		next.ServeHTTP(response, r)
 		latency := time.Since(now)
-
-		if response.status == 0 {
-			response.status = http.StatusOK
-		}
 
 		fields := log.Fields{
 			"latency":    latency,
