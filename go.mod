@@ -2,6 +2,7 @@ module github.com/Yubico/yubihsm-connector
 
 require (
 	github.com/google/gousb v0.0.0-20190812193832-18f4c1d8a750
+	github.com/google/uuid v1.1.1
 	github.com/kardianos/service v1.0.0
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/magiconair/properties v1.8.1 // indirect

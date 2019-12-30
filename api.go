@@ -15,27 +15,25 @@
 package main
 
 import (
-	"crypto/rand"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
 func uuidv4() (string, error) {
-	buf := make([]byte, 16)
-	n, err := io.ReadFull(rand.Reader, buf)
-	if n != len(buf) || err != nil {
+	uuid, err := uuid.NewRandom()
+	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%x-%x-%x-%x-%x",
-		buf[0:4], buf[4:6], buf[6:8], buf[8:10], buf[10:]), nil
+
+	return uuid.String(), nil
 }
 
 type statusReponse struct {

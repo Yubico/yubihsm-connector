@@ -2,6 +2,8 @@
 github.com/fsnotify/fsnotify
 # github.com/google/gousb v0.0.0-20190812193832-18f4c1d8a750
 github.com/google/gousb
+# github.com/google/uuid v1.1.1
+github.com/google/uuid
 # github.com/hashicorp/hcl v1.0.0
 github.com/hashicorp/hcl
 github.com/hashicorp/hcl/hcl/printer
