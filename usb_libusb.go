@@ -99,7 +99,7 @@ func usbopen(cid string, serial string) (err error) {
 		err = fmt.Errorf("device not found")
 		goto out
 	}
-	state.device.ControlTimeout = 0
+	state.device.ControlTimeout = 5 * time.Second
 
 	if err = state.device.Reset(); err != nil {
 		log.WithField(
