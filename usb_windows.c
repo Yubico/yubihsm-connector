@@ -364,6 +364,12 @@ static DWORD GetUsbDevice(int vendorId, int productId, char* serialNumber, PDEVI
                 error = GetLastError();
                 continue;
             }
+
+            if (!WinUsb_SetPipePolicy(interfaceHandle, PIPE_WRITE, PIPE_TRANSFER_TIMEOUT,
+                    sizeof(timeout), &timeout)) {
+                error = GetLastError();
+                continue;
+            }
         }
 
         // Device found, break out of loop and return it.
