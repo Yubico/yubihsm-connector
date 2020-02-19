@@ -1,1 +1,1 @@
-adduser --no-create-home --home /nonexistent --group --system yubihsm-connector
+adduser --no-create-home --group --system yubihsm-connector
