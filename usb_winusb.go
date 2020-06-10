@@ -67,7 +67,7 @@ func usbopen(cid string, timeout time.Duration, serial string) (err error) {
 	}
 
 	var timeoutMs int64 = timeout.Milliseconds()
-	if (timeoutMs > math.MaxUint32) {
+	if timeoutMs > math.MaxUint32 {
 		log.Fatalf("timeout must fit in a uint32")
 	}
 

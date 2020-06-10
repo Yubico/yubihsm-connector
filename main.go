@@ -37,9 +37,9 @@ import (
 )
 
 var (
-	// Host header whitelisting
-	hostHeaderWhitelisting bool
-	hostHeaderWhitelist    = []string{"localhost", "localhost.", "127.0.0.1", "[::1]"}
+	// Host header allowlisting
+	hostHeaderAllowlisting bool
+	hostHeaderAllowlist    = []string{"localhost", "localhost.", "127.0.0.1", "[::1]"}
 )
 
 type program struct {
@@ -204,10 +204,10 @@ func main() {
 	viper.BindPFlag("listen", rootCmd.PersistentFlags().Lookup("listen"))
 	rootCmd.PersistentFlags().BoolP("syslog", "L", false, "log to syslog/eventlog")
 	viper.BindPFlag("syslog", rootCmd.PersistentFlags().Lookup("syslog"))
-	rootCmd.PersistentFlags().BoolVar(&hostHeaderWhitelisting, "enable-host-header-whitelist", false, "Enable Host header whitelisting")
-	viper.BindPFlag("enable-host-whitelist", rootCmd.PersistentFlags().Lookup("enable-host-header-whitelist"))
-	rootCmd.PersistentFlags().StringSliceVar(&hostHeaderWhitelist, "host-header-whitelist", hostHeaderWhitelist, "Host header whitelist")
-	viper.BindPFlag("host-whitelist", rootCmd.PersistentFlags().Lookup("host-header-whitelist"))
+	rootCmd.PersistentFlags().BoolVar(&hostHeaderAllowlisting, "enable-host-header-allowlist", false, "Enable Host header allowlisting")
+	viper.BindPFlag("enable-host-allowlist", rootCmd.PersistentFlags().Lookup("enable-host-header-allowlist"))
+	rootCmd.PersistentFlags().StringSliceVar(&hostHeaderAllowlist, "host-header-allowlist", hostHeaderAllowlist, "Host header allowlist")
+	viper.BindPFlag("host-allowlist", rootCmd.PersistentFlags().Lookup("host-header-allowlist"))
 	rootCmd.PersistentFlags().Uint32P("timeout", "t", 0, "USB operation timeout in milliseconds (default 0, never timeout)")
 	viper.BindPFlag("timeout", rootCmd.PersistentFlags().Lookup("timeout"))
 
