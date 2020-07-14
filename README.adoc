@@ -30,16 +30,6 @@ Use "yubihsm-connector [command] --help" for more information about a command.
 - link:https://pre-commit.com[pre-commit]
 - link:https://libusb.info[libusb-1.0]
 
-=== Vendor code
-
-The vendor code is handled using "go mod vendor".
-
-To list vendor code:
-
-....
-$ go list -m all
-....
-
 === pre-commit
 
 ....

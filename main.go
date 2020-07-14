@@ -95,7 +95,7 @@ func (p *program) Stop(s service.Service) error {
 	return p.srv.Shutdown(nil)
 }
 
-//go:generate go run -mod=vendor version.in.go
+//go:generate go run version.in.go
 func main() {
 	loggingInit(service.Interactive())
 	if !service.Interactive() {
