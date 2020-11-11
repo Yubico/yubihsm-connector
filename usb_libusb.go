@@ -101,13 +101,6 @@ func usbopen(cid string, serial string) (err error) {
 	}
 	state.device.ControlTimeout = 5 * time.Second
 
-	if err = state.device.Reset(); err != nil {
-		log.WithField(
-			"Correlation-ID", cid,
-		).WithError(err).Error("unable to reset device")
-		goto out
-	}
-
 	state.config, err = state.device.Config(1)
 	if err != nil {
 		goto out
