@@ -138,7 +138,7 @@ func statusHandler(w http.ResponseWriter, r *http.Request, timeout time.Duration
 	})
 
 	var status string
-	if err = usbReopen(cid, fmt.Errorf("status request"), timeout, serial); err != nil {
+	if err = usbOpen(cid, timeout, serial); err != nil {
 		status = "NO_DEVICE"
 		clog.WithError(err).Warn("status failed to open usb device")
 	} else {

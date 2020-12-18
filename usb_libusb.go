@@ -155,11 +155,11 @@ func usbreopen(cid string, why error, serial string) (err error) {
 	return usbopen(cid, serial)
 }
 
-func usbReopen(cid string, why error, _ time.Duration, serial string) (err error) {
+func usbOpen(cid string, _ time.Duration, serial string) (err error) {
 	state.mtx.Lock()
 	defer state.mtx.Unlock()
 
-	return usbreopen(cid, why, serial)
+	return usbopen(cid, serial)
 }
 
 func usbwrite(buf []byte, cid string, timeout time.Duration) (err error) {
