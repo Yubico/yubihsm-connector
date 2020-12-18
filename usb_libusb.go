@@ -46,8 +46,17 @@ func usbopen(cid string, serial string) (err error) {
 		}
 	}
 	if state.device != nil {
-		log.WithField("Correlation-ID", cid).Debug("usb device already open")
-		return nil
+		var serialnumber, err = state.device.SerialNumber()
+		if err == nil {
+			log.WithFields(log.Fields{
+				"Correlation-ID": cid,
+				"Device-Serial":  serialnumber,
+			}).Debug("usb device already open")
+			return nil
+		} else {
+			log.WithField("Correlation-ID", cid).Debug("usb device lost")
+			usbclose(cid)
+		}
 	}
 
 	var devs []*gousb.Device
@@ -72,6 +81,7 @@ func usbopen(cid string, serial string) (err error) {
 			log.WithFields(log.Fields{
 				"Correlation-ID": cid,
 				"Device":         dev,
+				"Error":          err,
 			}).Debug("Couldn't read serial number from device")
 
 			dev.Close()
