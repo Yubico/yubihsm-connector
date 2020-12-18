@@ -1,7 +1,5 @@
 module github.com/Yubico/yubihsm-connector
 
-go 1.15
-
 require (
 	github.com/google/gousb v1.1.0
 	github.com/google/uuid v1.1.1
