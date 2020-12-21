@@ -160,29 +160,23 @@ func usbReopen(cid string, why error, timeout time.Duration, serial string) (err
 	state.mtx.Lock()
 	defer state.mtx.Unlock()
 
-	for {
-		err = usbopen(cid, serial)
-		if err != nil {
-			log.WithFields(log.Fields{
-				"Correlation-ID": cid,
-				"Error":          err,
-			}).Debug("Couldn't open device")
-			usbclose(cid)
-			continue
-		}
+	if err = usbopen(cid, serial); err != nil {
+		return err
+	}
 
+	for {
 		_, err := state.device.SerialNumber()
-		if err != nil {
-			log.WithFields(log.Fields{
-				"Correlation-ID": cid,
-				"Error":          err,
-			}).Debug("Couldn't read serial number from device")
-			usbclose(cid)
+		switch err {
+		case gousb.ErrorNoDevice, gousb.ErrorNotFound:
+			if err = usbreopen(cid, why, serial); err != nil {
+				return err
+			}
 			continue
 		}
 
 		break
 	}
+
 	return nil
 }
 
