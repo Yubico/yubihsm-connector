@@ -54,7 +54,10 @@ func usbopen(cid string, serial string) (err error) {
 			}).Debug("usb device already open")
 			return nil
 		} else {
-			log.WithField("Correlation-ID", cid).Debug("usb device lost")
+			log.WithFields(log.Fields{
+				"Correlation-ID": cid,
+				"Error":          err,
+			}).Debug("usb device lost")
 			usbclose(cid)
 		}
 	}
@@ -165,7 +168,7 @@ func usbreopen(cid string, why error, serial string) (err error) {
 	return usbopen(cid, serial)
 }
 
-func usbOpen(cid string, _ time.Duration, serial string) (err error) {
+func usbReopen(cid string, why error, timeout time.Duration, serial string) (err error) {
 	state.mtx.Lock()
 	defer state.mtx.Unlock()
 
