@@ -97,7 +97,7 @@ func usbopen(cid string, serial string) (err error) {
 		}
 	}
 	if state.device == nil {
-		err = gousb.ErrorNoDevice
+		err = fmt.Errorf("device not found")
 		goto out
 	}
 	state.device.ControlTimeout = 5 * time.Second
