@@ -100,16 +100,6 @@ func usbreopen(cid string, why error, timeout time.Duration, serial string) (err
 		"why":            why,
 	}).Debug("reopening usb context")
 
-	// If the first request to the connector is a status request,
-	// the device context might not have been created yet.
-	if device.ctx != nil {
-		if err = winusbError(C.usbReopen(device.ctx)); err != nil {
-			log.WithField(
-				"Correlation-ID", cid,
-			).WithError(err).Error("unable to reset device")
-		}
-	}
-
 	usbclose(cid)
 	return usbopen(cid, timeout, serial)
 }
