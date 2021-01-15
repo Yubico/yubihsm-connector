@@ -108,7 +108,7 @@ func usbReopen(cid string, why error, timeout time.Duration, serial string) (err
 	device.mtx.Lock()
 	defer device.mtx.Unlock()
 
-	if err = usbopen(cid, timout, serial); err != nil {
+	if err = usbopen(cid, timeout, serial); err != nil {
 		return err
 	}
 
@@ -187,14 +187,14 @@ func usbProxy(req []byte, cid string, timeout time.Duration, serial string) (res
 
 	for {
 		if err = usbwrite(req, cid); err != nil {
-			if err = usbreopen(cid, err, serial); err != nil {
+			if err = usbreopen(cid, err, timeout, serial); err != nil {
 				return nil, err
 			}
 			continue
 		}
 
 		if resp, err = usbread(cid); err != nil {
-			if err = usbreopen(cid, err, timout, serial); err != nil {
+			if err = usbreopen(cid, err, timeout, serial); err != nil {
 				return nil, err
 			}
 			continue
