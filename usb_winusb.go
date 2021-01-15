@@ -147,7 +147,7 @@ func usbwrite(buf []byte, cid string) (err error) {
 out:
 	log.WithFields(log.Fields{
 		"Correlation-ID": cid,
-		"n":              n,
+		"n":              uint(n),
 		"err":            err,
 		"len":            len(buf),
 		"buf":            buf,
@@ -174,7 +174,7 @@ func usbread(cid string) (buf []byte, err error) {
 out:
 	log.WithFields(log.Fields{
 		"Correlation-ID": cid,
-		"n":              n,
+		"n":              uint(n),
 		"err":            err,
 		"len":            len(buf),
 		"buf":            buf,
