@@ -465,10 +465,16 @@ void usbClose(PDEVICE_CONTEXT* device)
 
 DWORD usbCheck(PDEVICE_CONTEXT device, int vendorId, int productId)
 {
+    if (!device || !device->initialized)
+    {
+        return ERROR_INVALID_STATE;
+    }
+
     if (!IsMatchingDevice(device->usbInterface, vendorId, productId, NULL))
     {
         return ERROR_OBJECT_NOT_FOUND;
     }
+
     return ERROR_SUCCESS;
 }
 
