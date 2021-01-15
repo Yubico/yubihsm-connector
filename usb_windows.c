@@ -463,9 +463,9 @@ void usbClose(PDEVICE_CONTEXT* device)
     *device = NULL;
 }
 
-DWORD usbCheck(PDEVICE_CONTEXT device, int vendorId, int productId, char* serialNumber)
+DWORD usbCheck(PDEVICE_CONTEXT device, int vendorId, int productId)
 {
-    if (!IsMatchingDevice(device->usbInterface, vendorId, productId, serialNumber))
+    if (!IsMatchingDevice(device->usbInterface, vendorId, productId, NULL))
     {
         return ERROR_OBJECT_NOT_FOUND;
     }
