@@ -112,6 +112,25 @@ func usbReopen(cid string, why error, timeout time.Duration, serial string) (err
 		return err
 	}
 
+	cSerial := C.CString(serial)
+	defer C.free(unsafe.Pointer(cSerial))
+
+	for {
+		if err = winusbError(C.usbCheck(device.ctx, cSerial)); err != nil {
+			log.WithFields(log.Fields{
+				"Correlation-ID": cid,
+				"Error":          err,
+			}).Debug("Couldn't check usb context")
+
+			if err = usbreopen(cid, why, timeout, serial); err != nil {
+				return err
+			}
+			continue
+		}
+
+		break
+	}
+
 	return nil
 }
 

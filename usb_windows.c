@@ -463,6 +463,11 @@ void usbClose(PDEVICE_CONTEXT* device)
     *device = NULL;
 }
 
+DWORD usbCheck(PDEVICE_CONTEXT device, char* serialNumber)
+{
+    return ERROR_SUCCESS;
+}
+
 DWORD usbWrite(PDEVICE_CONTEXT device, PUCHAR buffer, ULONG bufferSizeInBytes, PULONG bytesTransferred)
 {
     if (!device || !device->initialized)
