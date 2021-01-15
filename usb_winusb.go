@@ -142,18 +142,6 @@ func usbwrite(buf []byte, cid string) (err error) {
 		goto out
 	}
 
-	if len(buf)%64 == 0 {
-		var empty []byte
-
-		if err = winusbError(C.usbWrite(
-			device.ctx,
-			(*C.UCHAR)(unsafe.Pointer(&buf[0])),
-			C.ULONG(len(empty)),
-			&n)); err != nil {
-			goto out
-		}
-	}
-
 out:
 	log.WithFields(log.Fields{
 		"Correlation-ID": cid,
