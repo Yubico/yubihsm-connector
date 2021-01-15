@@ -72,6 +72,7 @@ func usbopen(cid string, serial string) (err error) {
 			log.WithFields(log.Fields{
 				"Correlation-ID": cid,
 				"Device":         dev,
+				"Error":          err,
 			}).Debug("Couldn't read serial number from device")
 
 			dev.Close()
@@ -100,13 +101,6 @@ func usbopen(cid string, serial string) (err error) {
 		goto out
 	}
 	state.device.ControlTimeout = 5 * time.Second
-
-	if err = state.device.Reset(); err != nil {
-		log.WithField(
-			"Correlation-ID", cid,
-		).WithError(err).Error("unable to reset device")
-		goto out
-	}
 
 	state.config, err = state.device.Config(1)
 	if err != nil {
@@ -166,7 +160,27 @@ func usbReopen(cid string, why error, _ time.Duration, serial string) (err error
 	state.mtx.Lock()
 	defer state.mtx.Unlock()
 
-	return usbreopen(cid, why, serial)
+	if err = usbopen(cid, serial); err != nil {
+		return err
+	}
+
+	for {
+		if _, err := state.device.SerialNumber(); err != nil {
+			log.WithFields(log.Fields{
+				"Correlation-ID": cid,
+				"Error":          err,
+			}).Debug("Couldn't read serial number from device")
+
+			if err = usbreopen(cid, why, serial); err != nil {
+				return err
+			}
+			continue
+		}
+
+		break
+	}
+
+	return nil
 }
 
 func usbwrite(buf []byte, cid string, timeout time.Duration) (err error) {
@@ -239,18 +253,14 @@ func usbProxy(req []byte, cid string, timeout time.Duration, serial string) (res
 	}
 
 	for {
-		err = usbwrite(req, cid, timeout)
-		switch err {
-		case gousb.ErrorNoDevice, gousb.ErrorNotFound:
+		if err = usbwrite(req, cid, timeout); err != nil {
 			if err = usbreopen(cid, err, serial); err != nil {
 				return nil, err
 			}
 			continue
 		}
 
-		resp, err = usbread(cid, timeout)
-		switch err {
-		case gousb.ErrorNoDevice, gousb.ErrorNotFound:
+		if resp, err = usbread(cid, timeout); err != nil {
 			if err = usbreopen(cid, err, serial); err != nil {
 				return nil, err
 			}
