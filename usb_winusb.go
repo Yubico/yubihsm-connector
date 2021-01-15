@@ -108,7 +108,11 @@ func usbReopen(cid string, why error, timeout time.Duration, serial string) (err
 	device.mtx.Lock()
 	defer device.mtx.Unlock()
 
-	return usbreopen(cid, why, timeout, serial)
+	if err = usbopen(cid, timout, serial); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func usbwrite(buf []byte, cid string) (err error) {
@@ -182,19 +186,15 @@ func usbProxy(req []byte, cid string, timeout time.Duration, serial string) (res
 	}
 
 	for {
-		err = usbwrite(req, cid)
-		switch err {
-		case ERROR_INVALID_STATE, ERROR_INVALID_HANDLE, ERROR_BAD_COMMAND:
-			if err = usbreopen(cid, err, timeout, serial); err != nil {
+		if err = usbwrite(req, cid); err != nil {
+			if err = usbreopen(cid, err, serial); err != nil {
 				return nil, err
 			}
 			continue
 		}
 
-		resp, err = usbread(cid)
-		switch err {
-		case ERROR_INVALID_STATE, ERROR_INVALID_HANDLE, ERROR_BAD_COMMAND:
-			if err = usbreopen(cid, err, timeout, serial); err != nil {
+		if resp, err = usbread(cid); err != nil {
+			if err = usbreopen(cid, err, timout, serial); err != nil {
 				return nil, err
 			}
 			continue
