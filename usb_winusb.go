@@ -104,7 +104,7 @@ func usbreopen(cid string, why error, timeout time.Duration, serial string) (err
 	return usbopen(cid, timeout, serial)
 }
 
-func usbReopen(cid string, why error, timeout time.Duration, serial string) (err error) {
+func usbReopen(cid string, timeout time.Duration, serial string) (err error) {
 	device.mtx.Lock()
 	defer device.mtx.Unlock()
 
@@ -119,7 +119,7 @@ func usbReopen(cid string, why error, timeout time.Duration, serial string) (err
 				"Error":          err,
 			}).Debug("Couldn't check usb context")
 
-			if err = usbreopen(cid, why, timeout, serial); err != nil {
+			if err = usbreopen(cid, err, timeout, serial); err != nil {
 				return err
 			}
 			continue
