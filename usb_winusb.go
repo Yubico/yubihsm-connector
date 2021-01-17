@@ -104,7 +104,7 @@ func usbreopen(cid string, why error, timeout time.Duration, serial string) (err
 	return usbopen(cid, timeout, serial)
 }
 
-func usbReopen(cid string, timeout time.Duration, serial string) (err error) {
+func usbCheck(cid string, timeout time.Duration, serial string) (err error) {
 	device.mtx.Lock()
 	defer device.mtx.Unlock()
 

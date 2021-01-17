@@ -156,7 +156,7 @@ func usbreopen(cid string, why error, serial string) (err error) {
 	return usbopen(cid, serial)
 }
 
-func usbReopen(cid string, _ time.Duration, serial string) (err error) {
+func usbCheck(cid string, _ time.Duration, serial string) (err error) {
 	state.mtx.Lock()
 	defer state.mtx.Unlock()
 
