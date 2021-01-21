@@ -44,6 +44,14 @@ See the configured [hooks](.pre-commit-config.yaml) for details.
 $ make
 ....
 
+=== Cross-compiling for Windows
+
+To make this work you need to have mingw-w64 installed.
+
+....
+GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc go build
+....
+
 === Linting
 
 ....
