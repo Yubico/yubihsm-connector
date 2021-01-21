@@ -325,14 +325,6 @@ static DWORD GetUsbDevice(int vendorId, int productId, char* serialNumber, PDEVI
             continue;
         }
 
-        // This is vitally important since it declares that ZLP should be sent when a message
-        // would otherwise end on a packet boundary.
-        if (!WinUsb_SetPipePolicy(interfaceHandle, PIPE_WRITE,
-                SHORT_PACKET_TERMINATE, 1, (PVOID) "\x1")) {
-            error = GetLastError();
-            continue;
-        }
-
         if (!IsMatchingDevice(interfaceHandle, vendorId, productId, serialNumber))
         {
             // Set an error in case this is the last iteration of the loop.
@@ -367,6 +359,14 @@ static DWORD GetUsbDevice(int vendorId, int productId, char* serialNumber, PDEVI
 
             if (!WinUsb_SetPipePolicy(interfaceHandle, PIPE_WRITE, PIPE_TRANSFER_TIMEOUT,
                     sizeof(timeout), &timeout)) {
+                error = GetLastError();
+                continue;
+            }
+
+            // This is vitally important since it declares that ZLP should be sent when a message
+            // would otherwise end on a packet boundary.
+            if (!WinUsb_SetPipePolicy(interfaceHandle, PIPE_WRITE,
+                    SHORT_PACKET_TERMINATE, 1, (PVOID) "\x1")) {
                 error = GetLastError();
                 continue;
             }
@@ -480,21 +480,16 @@ void usbClose(PDEVICE_CONTEXT* device)
     *device = NULL;
 }
 
-DWORD usbReopen(PDEVICE_CONTEXT device)
+DWORD usbCheck(PDEVICE_CONTEXT device, int vendorId, int productId)
 {
     if (!device || !device->initialized)
     {
         return ERROR_INVALID_STATE;
     }
 
-    if (!WinUsb_ResetPipe(device->usbInterface, device->readPipe))
+    if (!IsMatchingDevice(device->usbInterface, vendorId, productId, NULL))
     {
-        return GetLastError();
-    }
-
-    if (!WinUsb_ResetPipe(device->usbInterface, device->writePipe))
-    {
-        return GetLastError();
+        return ERROR_OBJECT_NOT_FOUND;
     }
 
     return ERROR_SUCCESS;

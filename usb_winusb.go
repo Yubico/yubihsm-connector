@@ -100,25 +100,35 @@ func usbreopen(cid string, why error, timeout time.Duration, serial string) (err
 		"why":            why,
 	}).Debug("reopening usb context")
 
-	// If the first request to the connector is a status request,
-	// the device context might not have been created yet.
-	if device.ctx != nil {
-		if err = winusbError(C.usbReopen(device.ctx)); err != nil {
-			log.WithField(
-				"Correlation-ID", cid,
-			).WithError(err).Error("unable to reset device")
-		}
-	}
-
 	usbclose(cid)
 	return usbopen(cid, timeout, serial)
 }
 
-func usbReopen(cid string, why error, timeout time.Duration, serial string) (err error) {
+func usbCheck(cid string, timeout time.Duration, serial string) (err error) {
 	device.mtx.Lock()
 	defer device.mtx.Unlock()
 
-	return usbreopen(cid, why, timeout, serial)
+	if err = usbopen(cid, timeout, serial); err != nil {
+		return err
+	}
+
+	for {
+		if err = winusbError(C.usbCheck(device.ctx, 0x1050, 0x0030)); err != nil {
+			log.WithFields(log.Fields{
+				"Correlation-ID": cid,
+				"Error":          err,
+			}).Debug("Couldn't check usb context")
+
+			if err = usbreopen(cid, err, timeout, serial); err != nil {
+				return err
+			}
+			continue
+		}
+
+		break
+	}
+
+	return nil
 }
 
 func usbwrite(buf []byte, cid string) (err error) {
@@ -132,22 +142,10 @@ func usbwrite(buf []byte, cid string) (err error) {
 		goto out
 	}
 
-	if len(buf)%64 == 0 {
-		var empty []byte
-
-		if err = winusbError(C.usbWrite(
-			device.ctx,
-			(*C.UCHAR)(unsafe.Pointer(&buf[0])),
-			C.ULONG(len(empty)),
-			&n)); err != nil {
-			goto out
-		}
-	}
-
 out:
 	log.WithFields(log.Fields{
 		"Correlation-ID": cid,
-		"n":              n,
+		"n":              uint(n),
 		"err":            err,
 		"len":            len(buf),
 		"buf":            buf,
@@ -174,7 +172,7 @@ func usbread(cid string) (buf []byte, err error) {
 out:
 	log.WithFields(log.Fields{
 		"Correlation-ID": cid,
-		"n":              n,
+		"n":              uint(n),
 		"err":            err,
 		"len":            len(buf),
 		"buf":            buf,
@@ -192,18 +190,14 @@ func usbProxy(req []byte, cid string, timeout time.Duration, serial string) (res
 	}
 
 	for {
-		err = usbwrite(req, cid)
-		switch err {
-		case ERROR_INVALID_STATE, ERROR_INVALID_HANDLE, ERROR_BAD_COMMAND:
+		if err = usbwrite(req, cid); err != nil {
 			if err = usbreopen(cid, err, timeout, serial); err != nil {
 				return nil, err
 			}
 			continue
 		}
 
-		resp, err = usbread(cid)
-		switch err {
-		case ERROR_INVALID_STATE, ERROR_INVALID_HANDLE, ERROR_BAD_COMMAND:
+		if resp, err = usbread(cid); err != nil {
 			if err = usbreopen(cid, err, timeout, serial); err != nil {
 				return nil, err
 			}
