@@ -184,6 +184,12 @@ func apiHandler(w http.ResponseWriter, r *http.Request, timeout time.Duration, s
 		return
 	}
 
+	if len(buf) < 3 || len(buf) > 2048 {
+		http.Error(w, http.StatusText(http.StatusBadRequest),
+			http.StatusBadRequest)
+		return
+	}
+
 	if buf, err = usbProxy(buf, cid, timeout, serial); err != nil {
 		clog.WithError(err).Error("failed usb proxy")
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
@@ -198,6 +204,7 @@ func apiHandler(w http.ResponseWriter, r *http.Request, timeout time.Duration, s
 			http.StatusInternalServerError)
 		return
 	}
+
 	if n != len(buf) {
 		clog.WithError(err).WithFields(log.Fields{
 			"n":   n,
