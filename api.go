@@ -177,16 +177,16 @@ func apiHandler(w http.ResponseWriter, r *http.Request, timeout time.Duration, s
 		return
 	}
 
+	if r.ContentLength < 3 || r.ContentLength > 2048 {
+		http.Error(w, http.StatusText(http.StatusBadRequest),
+			http.StatusBadRequest)
+		return
+	}
+
 	if buf, err = ioutil.ReadAll(r.Body); err != nil {
 		clog.WithError(err).Error("failed reading incoming request")
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
-		return
-	}
-
-	if len(buf) < 3 || len(buf) > 2048 {
-		http.Error(w, http.StatusText(http.StatusBadRequest),
-			http.StatusBadRequest)
 		return
 	}
 
