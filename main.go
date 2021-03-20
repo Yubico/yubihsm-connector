@@ -15,6 +15,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -92,7 +93,7 @@ func (p *program) Start(s service.Service) error {
 }
 
 func (p *program) Stop(s service.Service) error {
-	return p.srv.Shutdown(nil)
+	return p.srv.Shutdown(context.TODO())
 }
 
 //go:generate go run version.in.go
