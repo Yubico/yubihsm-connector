@@ -252,21 +252,15 @@ func usbProxy(req []byte, cid string, timeout time.Duration, serial string) (res
 		return nil, err
 	}
 
-	for {
+	for i := 0; i < 2; i++ {
 		if err = usbwrite(req, cid, timeout); err != nil {
-			if err = usbreopen(cid, err, serial); err != nil {
-				return nil, err
+			if err2 := usbreopen(cid, err, serial); err2 != nil {
+				return nil, err2
 			}
 			continue
 		}
 
-		if resp, err = usbread(cid, timeout); err != nil {
-			if err = usbreopen(cid, err, serial); err != nil {
-				return nil, err
-			}
-			continue
-		}
-
+		resp, err = usbread(cid, timeout)
 		break
 	}
 
