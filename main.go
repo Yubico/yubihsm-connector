@@ -147,6 +147,9 @@ func main() {
 			if viper.GetBool("debug") {
 				log.SetLevel(log.DebugLevel)
 			}
+			if viper.GetBool("json") {
+				log.SetFormatter(&log.JSONFormatter{})
+			}
 			config := viper.GetString("config")
 			if config != "" {
 				viper.SetConfigFile(config)
@@ -205,6 +208,8 @@ func main() {
 	viper.BindPFlag("listen", rootCmd.PersistentFlags().Lookup("listen"))
 	rootCmd.PersistentFlags().BoolP("syslog", "L", false, "log to syslog/eventlog")
 	viper.BindPFlag("syslog", rootCmd.PersistentFlags().Lookup("syslog"))
+	rootCmd.PersistentFlags().Bool("json", false, "Emit JSON formatted logs")
+	viper.BindPFlag("json", rootCmd.PersistentFlags().Lookup("json"))
 	rootCmd.PersistentFlags().BoolVar(&hostHeaderAllowlisting, "enable-host-header-allowlist", false, "Enable Host header allowlisting")
 	viper.BindPFlag("enable-host-allowlist", rootCmd.PersistentFlags().Lookup("enable-host-header-allowlist"))
 	rootCmd.PersistentFlags().StringSliceVar(&hostHeaderAllowlist, "host-header-allowlist", hostHeaderAllowlist, "Host header allowlist")
