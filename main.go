@@ -144,9 +144,6 @@ func main() {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			if viper.GetBool("debug") {
-				log.SetLevel(log.DebugLevel)
-			}
 			config := viper.GetString("config")
 			if config != "" {
 				viper.SetConfigFile(config)
@@ -157,6 +154,9 @@ func main() {
 				if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
 					return err
 				}
+			}
+			if viper.GetBool("debug") {
+				log.SetLevel(log.DebugLevel)
 			}
 
 			certkeyErr := fmt.Errorf("cert and key must both be specified")
