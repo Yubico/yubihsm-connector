@@ -260,7 +260,7 @@ func usbProxy(req []byte, cid string, timeout time.Duration, serial string) (res
 			continue
 		}
 
-		resp, err = usbread(cid, timeout)
+		resp, err = usbread(cid, 0)
 		break
 	}
 
