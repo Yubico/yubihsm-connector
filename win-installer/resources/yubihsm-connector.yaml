@@ -1,0 +1,6 @@
+cert: ""
+key: ""
+listen: 127.0.0.1:12345
+seccomp: false
+serial: ""
+syslog: true

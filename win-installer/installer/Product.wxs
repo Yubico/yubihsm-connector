@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+	<?define ProductVersion="3.0.1" ?>
+	<?define ProductName="YubiHSM Connector" ?>
+	<Product Id="*" Name="$(var.ProductName)" Language="1033" Version="$(var.ProductVersion)" Manufacturer="Yubico AB" UpgradeCode="3730310e-468e-4f46-b1f3-2b0c53673470">
+		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine"  Description="$(var.ProductName) $(var.ProductVersion)" />
+
+		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+
+		<Condition Message="$(var.ProductName) is designed for Windows 10 and Windows Server 2012 R2 or later.">
+			Installed OR (VersionNT>=603)
+		</Condition>
+		<Condition Message="This package requires 64-bit Windows.">
+			VersionNT64
+		</Condition>
+		<Condition Message="You need to be an administrator to install $(var.ProductName).">
+			Privileged
+		</Condition>
+
+		<WixVariable Id="WixUILicenseRtf" Value="..\resources\YubiHSMConnectorLicense.rtf" />
+
+		<UI>
+			<TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8" />
+			<TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12" />
+			<TextStyle Id="WixUI_Font_Title" FaceName="Tahoma" Size="9" Bold="yes" Red="255" Blue="255" Green="255"/>
+			<Property Id="DefaultUIFont" Value="WixUI_Font_Normal" />
+			<Property Id="WixUI_Mode" Value="Minimal" />
+			<DialogRef Id="ErrorDlg" />
+			<DialogRef Id="FatalError" />
+			<DialogRef Id="FilesInUse" />
+			<DialogRef Id="MsiRMFilesInUse" />
+			<DialogRef Id="PrepareDlg" />
+			<DialogRef Id="ProgressDlg" />
+			<DialogRef Id="ResumeDlg" />
+			<DialogRef Id="UserExit" />
+			<Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="LicenseAgreementDlg">1</Publish>
+			<Publish Dialog="LicenseAgreementDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg">1</Publish>
+			<Publish Dialog="LicenseAgreementDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">LicenseAccepted = "1"</Publish>
+			<Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999">1</Publish>
+			<Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="LicenseAgreementDlg">NOT Installed</Publish>
+			<Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg">Installed</Publish>
+			<Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog" Value="MaintenanceTypeDlg">1</Publish>
+			<Publish Dialog="MaintenanceTypeDlg" Control="RepairButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+			<Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+			<Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg">1</Publish>
+			<Property Id="ARPNOREPAIR" Value="yes" Secure="yes" />
+			<Property Id="ARPNOMODIFY" Value="yes" Secure="yes" />
+			<UIRef Id="WixUI_Common" />
+		</UI>
+
+		<Media Id="1" Cabinet="YubiHSMConnector.cab" EmbedCab="yes" />
+
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramFiles64Folder">
+				<Directory Id="APPLICATIONROOTDIRECTORY" Name="$(var.ProductName)">
+					<Component Id="ProductComponent" Guid="61D6AFCC-E7ED-4D9A-BCE3-AFCDB743C720" Win64="yes">
+						<File
+						  Name="yubihsm-connector.exe"
+						  Source="..\..\bin\yubihsm-connector.exe"
+						  Id="yubihsm_connector.exe"
+						  Checksum="yes"
+						  Vital="yes"
+						  KeyPath="yes" />
+
+						<Util:EventSource
+						  xmlns:Util="http://schemas.microsoft.com/wix/UtilExtension"
+						  Name="YubiHSM Connector"
+						  Log="Yubico"
+						  EventMessageFile="%SystemRoot%\System32\EventCreate.exe"
+						  SupportsErrors="yes"
+						  SupportsInformationals="yes"
+						  SupportsWarnings="yes"/>
+
+						<ServiceInstall Id="YubiHSMConnectorServiceInstall" Type="ownProcess" Name="yhconsrv" DisplayName="YubiHSM Connector Service"
+							Description="Implements the http-usb interface for the YubiHSM" Start="auto" Account="NT AUTHORITY\NetworkService" ErrorControl="normal" Vital="yes">
+							<util:ServiceConfig FirstFailureActionType="restart" SecondFailureActionType="restart" ThirdFailureActionType="none" RestartServiceDelayInSeconds="60" />
+						</ServiceInstall>
+
+						<ServiceControl Id="YubiHSMConnectorServiceControl" Start="install" Stop="both" Remove="uninstall" Name="yhconsrv" Wait="no" />
+					</Component>
+				</Directory>
+			</Directory>
+			<Directory Id="CommonAppDataFolder">
+				<Directory Id="APPLICATIONCONFIGDIRECTORY" Name="YubiHSM">
+					<Component Id="ConfigurationComponent" Guid="14BFE86B-46F5-44CE-9355-D64ABBCCD2A0" Win64="yes" KeyPath="yes">
+						<File
+						  Name="yubihsm-connector.yaml"
+						  Source="..\resources\yubihsm-connector.yaml"
+						  Id="yubihsm_connector.yaml"
+						  Checksum="no"
+						  Vital="no" />
+					</Component>
+				</Directory>
+			</Directory>
+		</Directory>
+
+		<Feature Id="ProductFeature" Title="YubiHSMConnectorInstaller" Level="1">
+			<ComponentRef Id="ProductComponent" />
+			<ComponentRef Id="ConfigurationComponent" />
+		</Feature>
+	</Product>
+</Wix>
