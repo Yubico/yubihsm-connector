@@ -1,0 +1,33 @@
+name: "Building release binaries on MacOS"
+
+on: [push]
+
+jobs:
+  Windows-Build:
+
+    runs-on: macos-10.15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Build binary
+        run: |
+          set -e -o pipefail
+          set -x
+          mkdir artifact
+
+          brew install go@1.14
+          export PATH=$PATH:/usr/local/opt/go\@1.14/bin:~/go/bin
+
+          make GB_BUILD_FLAGS="-tags disable_seccomp -ldflags '-s'"
+          strip -u -r bin/yubihsm-connector*
+          cp bin/yubihsm-connector artifact
+
+          ./bin/yubihsm-connector --help
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: yubihsm-connector-mac-amd64
+          path: artifact

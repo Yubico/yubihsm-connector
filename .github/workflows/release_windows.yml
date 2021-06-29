@@ -29,7 +29,7 @@ jobs:
           cd win-installer
           & cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsMSBuildCmd.bat" && msbuild YubiHSMConnectorInstaller.sln /p:Configuration=Release'
 
-          Copy-Item x64/Release/yubihsm-connector-windows-amd64.msi -Destination ..\artifact\
+          cp x64/Release/yubihsm-connector-windows-amd64.msi ..\artifact\
 
       - name: Upload artifact
         uses: actions/upload-artifact@v1

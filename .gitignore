@@ -7,3 +7,4 @@ win-installer/x64/
 win-installer/Debug/
 win-installer/Release/
 win-installer/.vs
+win-installer/installer/obj/
