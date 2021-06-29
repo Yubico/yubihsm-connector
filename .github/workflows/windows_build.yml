@@ -21,7 +21,7 @@ jobs:
           go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo
           refreshenv
 
-          ls
+          Get-Childitem –Path C:\ -Include *goversioninfo* -Recurse -ErrorAction SilentlyContinue
 
           go generate ./...
           go build -o bin/yubihsm-connector.exe
