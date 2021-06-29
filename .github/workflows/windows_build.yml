@@ -18,7 +18,7 @@ jobs:
 
           choco install -y golang --version=1.14
           refreshenv
-          go
+          go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo
 
           go generate ./...
           go build -o bin/yubihsm-connector.exe
