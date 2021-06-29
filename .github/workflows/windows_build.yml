@@ -24,7 +24,7 @@ jobs:
 
           go generate ./...
           go build -o bin/yubihsm-connector.exe
-          Copy-Item bin/yubihsm-connector.exe -Destination ..\artifact\
+          cp bin/yubihsm-connector.exe artifact\
 
           Get-Childitem –Path C:\ -Include VsMSBuildCmd.bat -Recurse -ErrorAction SilentlyContinue
 
