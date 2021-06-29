@@ -19,9 +19,7 @@ jobs:
           choco install -y golang --version=1.14
           refreshenv
           go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo
-          refreshenv
-
-          Get-Childitem –Path C:\ -Include *goversioninfo* -Recurse -ErrorAction SilentlyContinue
+          $env:Path += ";C:\Users\runneradmin\go\bin"
 
           go generate ./...
           go build -o bin/yubihsm-connector.exe
