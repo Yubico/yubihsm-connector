@@ -15,6 +15,7 @@ jobs:
         run: |
           $ErrorActionPreference = "Stop"
           Set-PSDebug -Trace 1
+          mkdir artifact
 
           choco install -y golang --version=1.14
           refreshenv
@@ -23,15 +24,15 @@ jobs:
 
           go generate ./...
           go build -o bin/yubihsm-connector.exe
+          Copy-Item bin/yubihsm-connector.exe -Destination ..\artifact\
 
-          ls 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\Tools'
           Get-Childitem –Path C:\ -Include VsMSBuildCmd.bat -Recurse -ErrorAction SilentlyContinue
 
           cd win-installer
           cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\Tools\VsMSBuildCmd.bat" && msbuild YubiHSMConnectorInstaller.sln /p:Configuration=Release'
 
-          mkdir artifact
-          Copy-Item x64/Release/yubihsm-connector-windows-amd64.msi -Destination artifact\
+
+          Copy-Item x64/Release/yubihsm-connector-windows-amd64.msi -Destination ..\artifact\
 
       - name: Upload artifact
         uses: actions/upload-artifact@v1
