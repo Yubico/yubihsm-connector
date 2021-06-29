@@ -17,10 +17,14 @@ jobs:
           Set-PSDebug -Trace 1
 
           choco install -y golang --version=1.14
-          $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
-          $env:GOROOT = [System.Environment]::GetEnvironmentVariable("GOROOT", "Machine")
-          $env:GOPATH = "$env:UserProfile\go"
-          $env:Path = $env:Path + ";" + $env:GOPATH + "\bin"
+          refreshenv
+          go
+
+#          $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+#          $env:GOROOT = [System.Environment]::GetEnvironmentVariable("GOROOT", "Machine")
+#          $env:GOPATH = "$env:UserProfile\go"
+#          $env:Path = $env:Path + ";" + $env:GOPATH + "\bin"
+#          Get-Childitem –Path C:\ -Include go* -Recurse -ErrorAction SilentlyContinue
 
           go generate ./...
           go build -o bin/yubihsm-connector.exe
