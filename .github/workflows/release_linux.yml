@@ -17,7 +17,8 @@ jobs:
           set -x
           mkdir artifact
 
-
+          sudo apt-get update && sudo  apt-get dist-upgrade -y
+          sudo apt-get install -y libusb-1.0.0-dev
 
           export PATH=$PATH:/usr/local/go/bin:~/go/bin
           if [[ ! -x $(command -v go ) ]]; then
@@ -58,7 +59,8 @@ jobs:
           set -x
           mkdir artifact
 
-
+          sudo apt-get update && sudo  apt-get dist-upgrade -y
+          sudo apt-get install -y libusb-1.0.0-dev
 
           export PATH=$PATH:/usr/local/go/bin:~/go/bin
           if [[ ! -x $(command -v go ) ]]; then
