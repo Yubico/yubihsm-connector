@@ -1,4 +1,4 @@
-name: "Building release binaries on MacOS"
+name: "Building release binaries on Linux"
 
 on: [push]
 
