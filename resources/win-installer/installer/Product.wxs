@@ -56,7 +56,7 @@
 					<Component Id="ProductComponent" Guid="61D6AFCC-E7ED-4D9A-BCE3-AFCDB743C720" Win64="yes">
 						<File
 						  Name="yubihsm-connector.exe"
-						  Source="..\..\bin\yubihsm-connector.exe"
+						  Source="..\..\..\bin\yubihsm-connector.exe"
 						  Id="yubihsm_connector.exe"
 						  Checksum="yes"
 						  Vital="yes"
