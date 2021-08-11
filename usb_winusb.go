@@ -60,25 +60,19 @@ func winusbError(err error) error {
 	return nil
 }
 
-func usbopen(cid string, timeout time.Duration, serial string) (err error) {
+func usbopen(cid string, serial string) (err error) {
 	if device.ctx != nil {
 		log.WithField("Correlation-ID", cid).Debug("usb context already open")
 		return nil
 	}
 
-	var timeoutMs int64 = timeout.Milliseconds()
-	if timeoutMs > math.MaxUint32 {
-		log.Fatalf("timeout must fit in a uint32")
-	}
-
-	var ms C.ULONG = C.ulong(uint32(timeoutMs))
 	if serial != "" {
 		cSerial := C.CString(serial)
 		defer C.free(unsafe.Pointer(cSerial))
 
-		err = winusbError(C.usbOpen(0x1050, 0x0030, cSerial, &device.ctx, ms))
+		err = winusbError(C.usbOpen(0x1050, 0x0030, cSerial, &device.ctx))
 	} else {
-		err = winusbError(C.usbOpen(0x1050, 0x0030, nil, &device.ctx, ms))
+		err = winusbError(C.usbOpen(0x1050, 0x0030, nil, &device.ctx))
 	}
 
 	if device.ctx == nil {
@@ -132,13 +126,10 @@ func usbCheck(cid string, timeout time.Duration, serial string) (err error) {
 }
 
 func usbwrite(buf []byte, cid string) (err error) {
-	var n C.ULONG
-
 	if err = winusbError(C.usbWrite(
 		device.ctx,
 		(*C.UCHAR)(unsafe.Pointer(&buf[0])),
-		C.ULONG(len(buf)),
-		&n)); err != nil {
+		C.ULONG(len(buf)))); err != nil {
 		goto out
 	}
 
@@ -155,15 +146,12 @@ out:
 }
 
 func usbread(cid string) (buf []byte, err error) {
-	var n C.ULONG
-
 	buf = make([]byte, 8192)
 
 	if err = winusbError(C.usbRead(
 		device.ctx,
 		(*C.UCHAR)(unsafe.Pointer(&buf[0])),
-		C.ULONG(len(buf)),
-		&n)); err != nil {
+		C.ULONG(len(buf)))); err != nil {
 		buf = buf[:0]
 		goto out
 	}
