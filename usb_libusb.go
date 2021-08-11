@@ -244,6 +244,7 @@ out:
 	return buf, err
 }
 
+// DEPRECATED the parameter timeout is deprecated and will be removed in a future release
 func usbProxy(req []byte, cid string, timeout time.Duration, serial string) (resp []byte, err error) {
 	state.mtx.Lock()
 	defer state.mtx.Unlock()

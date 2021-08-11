@@ -209,7 +209,7 @@ func main() {
 	viper.BindPFlag("enable-host-allowlist", rootCmd.PersistentFlags().Lookup("enable-host-header-allowlist"))
 	rootCmd.PersistentFlags().StringSliceVar(&hostHeaderAllowlist, "host-header-allowlist", hostHeaderAllowlist, "Host header allowlist")
 	viper.BindPFlag("host-allowlist", rootCmd.PersistentFlags().Lookup("host-header-allowlist"))
-	rootCmd.PersistentFlags().Uint32P("timeout", "t", 0, "USB operation timeout in milliseconds (default 0, never timeout)")
+	rootCmd.PersistentFlags().Uint32P("timeout", "t", 0, "(DEPRECATED) USB operation timeout in milliseconds (default 0, never timeout)")
 	viper.BindPFlag("timeout", rootCmd.PersistentFlags().Lookup("timeout"))
 
 	configCmd := &cobra.Command{
