@@ -5,7 +5,7 @@ Source for the Windows installer for the yubihsm-connector
 # Prerequisities
 
  * WiX v3.9+ (obtained from [wixtoolset.org/releases](http://wixtoolset.org/releases))
- * Visual Studio 2015 or MSBuild that can build WiX projects
+ * Visual Studio 2019 or MSBuild that can build WiX projects
 
 # Build
 
