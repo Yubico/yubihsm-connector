@@ -18,9 +18,7 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"sync"
-	"time"
 	"unsafe"
 
 	log "github.com/sirupsen/logrus"
@@ -88,21 +86,21 @@ func usbclose(cid string) {
 	}
 }
 
-func usbreopen(cid string, why error, timeout time.Duration, serial string) (err error) {
+func usbreopen(cid string, why error, serial string) (err error) {
 	log.WithFields(log.Fields{
 		"Correlation-ID": cid,
 		"why":            why,
 	}).Debug("reopening usb context")
 
 	usbclose(cid)
-	return usbopen(cid, timeout, serial)
+	return usbopen(cid, serial)
 }
 
-func usbCheck(cid string, timeout time.Duration, serial string) (err error) {
+func usbCheck(cid string, serial string) (err error) {
 	device.mtx.Lock()
 	defer device.mtx.Unlock()
 
-	if err = usbopen(cid, timeout, serial); err != nil {
+	if err = usbopen(cid, serial); err != nil {
 		return err
 	}
 
@@ -113,7 +111,7 @@ func usbCheck(cid string, timeout time.Duration, serial string) (err error) {
 				"Error":          err,
 			}).Debug("Couldn't check usb context")
 
-			if err = usbreopen(cid, err, timeout, serial); err != nil {
+			if err = usbreopen(cid, err, serial); err != nil {
 				return err
 			}
 			continue
@@ -126,10 +124,13 @@ func usbCheck(cid string, timeout time.Duration, serial string) (err error) {
 }
 
 func usbwrite(buf []byte, cid string) (err error) {
+	var n C.ULONG
+
 	if err = winusbError(C.usbWrite(
 		device.ctx,
 		(*C.UCHAR)(unsafe.Pointer(&buf[0])),
-		C.ULONG(len(buf)))); err != nil {
+		C.ULONG(len(buf)),
+		&n)); err != nil {
 		goto out
 	}
 
@@ -146,12 +147,15 @@ out:
 }
 
 func usbread(cid string) (buf []byte, err error) {
+	var n C.ULONG
+
 	buf = make([]byte, 8192)
 
 	if err = winusbError(C.usbRead(
 		device.ctx,
 		(*C.UCHAR)(unsafe.Pointer(&buf[0])),
-		C.ULONG(len(buf)))); err != nil {
+		C.ULONG(len(buf)),
+		&n)); err != nil {
 		buf = buf[:0]
 		goto out
 	}
@@ -169,17 +173,17 @@ out:
 	return buf, err
 }
 
-func usbProxy(req []byte, cid string, timeout time.Duration, serial string) (resp []byte, err error) {
+func usbProxy(req []byte, cid string, serial string) (resp []byte, err error) {
 	device.mtx.Lock()
 	defer device.mtx.Unlock()
 
-	if err = usbopen(cid, timeout, serial); err != nil {
+	if err = usbopen(cid, serial); err != nil {
 		return nil, err
 	}
 
 	for i := 0; i < 2; i++ {
 		if err = usbwrite(req, cid); err != nil {
-			if err2 := usbreopen(cid, err, timeout, serial); err2 != nil {
+			if err2 := usbreopen(cid, err, serial); err2 != nil {
 				return nil, err2
 			}
 			continue
