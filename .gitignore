@@ -3,3 +3,10 @@ vendor/pkg/*
 .tags*
 version.go
 versioninfo.json
+resources/release/.vagrant
+resources/release/build
+resources/win-installer/x64/
+resources/win-installer/Debug/
+resources/win-installer/Release/
+resources/win-installer/.vs
+resources/win-installer/installer/obj/
