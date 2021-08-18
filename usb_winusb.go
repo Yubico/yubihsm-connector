@@ -18,9 +18,7 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"sync"
-	"time"
 	"unsafe"
 
 	log "github.com/sirupsen/logrus"
