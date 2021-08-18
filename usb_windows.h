@@ -36,7 +36,7 @@ typedef struct DEVICE_CONTEXT
 
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
 
-extern DWORD usbOpen(int vendorId, int productId, char* serialNumber, PDEVICE_CONTEXT* device);
+extern DWORD usbOpen(int vendorId, int productId, char* serialNumber, PDEVICE_CONTEXT* device, ULONG timeout);
 extern void  usbClose(PDEVICE_CONTEXT* device);
 extern DWORD usbCheck(PDEVICE_CONTEXT device, int vendorId, int productId);
 extern DWORD usbWrite(PDEVICE_CONTEXT device, PUCHAR buffer, ULONG bufferSizeInBytes, PULONG bytesTransferred);

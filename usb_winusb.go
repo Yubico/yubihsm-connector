@@ -18,7 +18,9 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"sync"
+	"time"
 	"unsafe"
 
 	log "github.com/sirupsen/logrus"
@@ -154,8 +156,7 @@ func usbread(cid string) (buf []byte, err error) {
 	if err = winusbError(C.usbRead(
 		device.ctx,
 		(*C.UCHAR)(unsafe.Pointer(&buf[0])),
-		C.ULONG(len(buf)),
-		&n)); err != nil {
+		C.ULONG(len(buf)))); err != nil {
 		buf = buf[:0]
 		goto out
 	}

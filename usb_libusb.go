@@ -17,6 +17,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"time"
@@ -121,6 +122,8 @@ func usbopen(cid string, serial string) (err error) {
 		goto out
 	}
 
+	usbread(cid, 1*time.Millisecond)
+
 	return nil
 
 out:
@@ -182,13 +185,15 @@ func usbCheck(cid string, serial string) (err error) {
 
 func usbwrite(buf []byte, cid string) (err error) {
 	var n int
+	var ctx context.Context
 
-	if n, err = state.wendpoint.Write(buf); err != nil {
+	ctx = context.Background()
+   	if n, err = state.wendpoint.WriteContext(ctx, buf); err != nil {
 		goto out
 	}
 	if len(buf)%64 == 0 {
 		var empty []byte
-		if n, err = state.wendpoint.Write(empty); err != nil {
+		if n, err = state.wendpoint.WriteContext(ctx, empty); err != nil {
 			goto out
 		}
 	}
@@ -205,11 +210,18 @@ out:
 	return err
 }
 
-func usbread(cid string) (buf []byte, err error) {
+func usbread(cid string, timeout time.Duration) (buf []byte, err error) {
 	var n int
+	var ctx context.Context
 
 	buf = make([]byte, 8192)
-	if n, err = state.rendpoint.Read(buf); err != nil {
+	ctx = context.Background()
+    	if timeout > 0 {
+    		var cancel func()
+    		ctx, cancel = context.WithTimeout(ctx, timeout)
+    		defer cancel()
+    	}
+    	if n, err = state.rendpoint.ReadContext(ctx, buf); err != nil {
 		buf = buf[:0]
 		goto out
 	}
@@ -243,7 +255,7 @@ func usbProxy(req []byte, cid string, serial string) (resp []byte, err error) {
 			continue
 		}
 
-		resp, err = usbread(cid)
+		resp, err = usbread(cid, 0)
 		break
 	}
 
