@@ -256,7 +256,7 @@ Cleanup:
     return error == ERROR_SUCCESS;
 }
 
-static DWORD GetUsbDevice(int vendorId, int productId, char* serialNumber, PDEVICE_CONTEXT ctx, ULONG confTimeout)
+static DWORD GetUsbDevice(int vendorId, int productId, char* serialNumber, PDEVICE_CONTEXT ctx)
 {
     HANDLE                           deviceHandle    = INVALID_HANDLE_VALUE;
     SP_DEVINFO_DATA                  deviceInfoData  = { sizeof(SP_DEVINFO_DATA) };
@@ -333,35 +333,35 @@ static DWORD GetUsbDevice(int vendorId, int productId, char* serialNumber, PDEVI
         }
 
         {
-            // we set up a dummy read with a 10ms timeout here, if the timeout is too
-            // short this times out before it has time to complete. The reason for
-            // doing this is that there might be data left in the device buffers from
-            // earlier transactions, this should flush it.
-            BYTE buf[2048];
-            ULONG transferred = 0;
-            ULONG timeout = 10;
+          // we set up a dummy read with a 10ms timeout here, if the timeout is too
+          // short this times out before it has time to complete. The reason for
+          // doing this is that there might be data left in the device buffers from
+          // earlier transactions, this should flush it.
+          BYTE buf[2048];
+          ULONG transferred = 0;
+          ULONG timeout = 10;
 
-            if (!WinUsb_SetPipePolicy(interfaceHandle, PIPE_READ, PIPE_TRANSFER_TIMEOUT,
-                    sizeof(timeout), &timeout)) {
-                error = GetLastError();
-                continue;
-            }
+          if (!WinUsb_SetPipePolicy(interfaceHandle, PIPE_READ, PIPE_TRANSFER_TIMEOUT,
+                                    sizeof(timeout), &timeout)) {
+            error = GetLastError();
+            continue;
+          }
 
-            // we don't really care about what happens to this read request..
-            WinUsb_ReadPipe(interfaceHandle, PIPE_READ, buf, sizeof(buf), &transferred, 0);
+          // we don't really care about what happens to this read request..
+          WinUsb_ReadPipe(interfaceHandle, PIPE_READ, buf, sizeof(buf), &transferred, 0);
 
-            timeout = confTimeout;
-            if (!WinUsb_SetPipePolicy(interfaceHandle, PIPE_READ, PIPE_TRANSFER_TIMEOUT,
-                    sizeof(timeout), &timeout)) {
-                error = GetLastError();
-                continue;
-            }
+          timeout = 0;
+          if (!WinUsb_SetPipePolicy(interfaceHandle, PIPE_READ, PIPE_TRANSFER_TIMEOUT,
+                                    sizeof(timeout), &timeout)) {
+            error = GetLastError();
+            continue;
+          }
 
-            if (!WinUsb_SetPipePolicy(interfaceHandle, PIPE_WRITE, PIPE_TRANSFER_TIMEOUT,
-                    sizeof(timeout), &timeout)) {
-                error = GetLastError();
-                continue;
-            }
+          if (!WinUsb_SetPipePolicy(interfaceHandle, PIPE_WRITE, PIPE_TRANSFER_TIMEOUT,
+                                    sizeof(timeout), &timeout)) {
+            error = GetLastError();
+            continue;
+          }
 
             // This is vitally important since it declares that ZLP should be sent when a message
             // would otherwise end on a packet boundary.
@@ -401,7 +401,7 @@ Cleanup:
     return error;
 }
 
-DWORD usbOpen(int vendorId, int productId, char* serialNumber, PDEVICE_CONTEXT* device, ULONG timeout)
+DWORD usbOpen(int vendorId, int productId, char* serialNumber, PDEVICE_CONTEXT* device)
 {
     PDEVICE_CONTEXT ctx   = NULL;
     DWORD           error = ERROR_SUCCESS;
@@ -427,7 +427,7 @@ DWORD usbOpen(int vendorId, int productId, char* serialNumber, PDEVICE_CONTEXT* 
     ctx->writePipe    = 0;
     ctx->initialized  = FALSE;
 
-    error = GetUsbDevice(vendorId, productId, serialNumber, ctx, timeout);
+    error = GetUsbDevice(vendorId, productId, serialNumber, ctx);
     if (error != ERROR_SUCCESS)
     {
         printf("GetUsbDevice returned 0x%x\n", error);

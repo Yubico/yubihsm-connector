@@ -156,7 +156,7 @@ func usbreopen(cid string, why error, serial string) (err error) {
 	return usbopen(cid, serial)
 }
 
-func usbCheck(cid string, _ time.Duration, serial string) (err error) {
+func usbCheck(cid string, serial string) (err error) {
 	state.mtx.Lock()
 	defer state.mtx.Unlock()
 
@@ -183,17 +183,12 @@ func usbCheck(cid string, _ time.Duration, serial string) (err error) {
 	return nil
 }
 
-func usbwrite(buf []byte, cid string, timeout time.Duration) (err error) {
+func usbwrite(buf []byte, cid string) (err error) {
 	var n int
 	var ctx context.Context
 
 	ctx = context.Background()
-	if timeout > 0 {
-		var cancel func()
-		ctx, cancel = context.WithTimeout(ctx, timeout)
-		defer cancel()
-	}
-	if n, err = state.wendpoint.WriteContext(ctx, buf); err != nil {
+   	if n, err = state.wendpoint.WriteContext(ctx, buf); err != nil {
 		goto out
 	}
 	if len(buf)%64 == 0 {
@@ -221,12 +216,12 @@ func usbread(cid string, timeout time.Duration) (buf []byte, err error) {
 
 	buf = make([]byte, 8192)
 	ctx = context.Background()
-	if timeout > 0 {
-		var cancel func()
-		ctx, cancel = context.WithTimeout(ctx, timeout)
-		defer cancel()
-	}
-	if n, err = state.rendpoint.ReadContext(ctx, buf); err != nil {
+    	if timeout > 0 {
+    		var cancel func()
+    		ctx, cancel = context.WithTimeout(ctx, timeout)
+    		defer cancel()
+    	}
+    	if n, err = state.rendpoint.ReadContext(ctx, buf); err != nil {
 		buf = buf[:0]
 		goto out
 	}
@@ -244,7 +239,7 @@ out:
 	return buf, err
 }
 
-func usbProxy(req []byte, cid string, timeout time.Duration, serial string) (resp []byte, err error) {
+func usbProxy(req []byte, cid string, serial string) (resp []byte, err error) {
 	state.mtx.Lock()
 	defer state.mtx.Unlock()
 
@@ -253,14 +248,14 @@ func usbProxy(req []byte, cid string, timeout time.Duration, serial string) (res
 	}
 
 	for i := 0; i < 2; i++ {
-		if err = usbwrite(req, cid, timeout); err != nil {
+		if err = usbwrite(req, cid); err != nil {
 			if err2 := usbreopen(cid, err, serial); err2 != nil {
 				return nil, err2
 			}
 			continue
 		}
 
-		resp, err = usbread(cid, timeout)
+		resp, err = usbread(cid, 0)
 		break
 	}
 

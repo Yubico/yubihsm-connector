@@ -49,15 +49,14 @@ type program struct {
 
 func (p *program) Start(s service.Service) error {
 	addr := viper.GetString("listen")
-	timeout := timeoutToMs(viper.GetUint32("timeout"))
 	serial, _ := ensureSerial(viper.GetString("serial"))           // already validated by Cobra
 	p.srv = &http.Server{Addr: addr, ReadTimeout: 5 * time.Second} // Hard coded 5s timeout to prevent resource starvation
 
 	http.HandleFunc("/connector/status", middlewareWrapper(func(w http.ResponseWriter, r *http.Request) {
-		statusHandler(w, r, timeout, serial)
+		statusHandler(w, r, serial)
 	}))
 	http.HandleFunc("/connector/api", middlewareWrapper(func(w http.ResponseWriter, r *http.Request) {
-		apiHandler(w, r, timeout, serial)
+		apiHandler(w, r, serial)
 	}))
 
 	if viper.GetBool("seccomp") {
@@ -209,7 +208,7 @@ func main() {
 	viper.BindPFlag("enable-host-allowlist", rootCmd.PersistentFlags().Lookup("enable-host-header-allowlist"))
 	rootCmd.PersistentFlags().StringSliceVar(&hostHeaderAllowlist, "host-header-allowlist", hostHeaderAllowlist, "Host header allowlist")
 	viper.BindPFlag("host-allowlist", rootCmd.PersistentFlags().Lookup("host-header-allowlist"))
-	rootCmd.PersistentFlags().Uint32P("timeout", "t", 0, "USB operation timeout in milliseconds (default 0, never timeout)")
+	rootCmd.PersistentFlags().Uint32P("timeout", "t", 0, "(DEPRECATED) USB operation timeout in milliseconds (default 0, never timeout)")
 	viper.BindPFlag("timeout", rootCmd.PersistentFlags().Lookup("timeout"))
 
 	configCmd := &cobra.Command{
