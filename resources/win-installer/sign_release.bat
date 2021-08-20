@@ -1,1 +1,1 @@
-signtool sign /ph /fd "SHA256" /ac "C:\Program Files (x86)\Windows Kits\10\crosscertificates\DigiCert_High_Assurance_EV_Root_CA.crt" /sha1 "e3d2c802499e8837c3affdb6ca3c4448497ae317" /t "http://timestamp.digicert.com" /d "YubiHSM Connector" ..\bin\yubihsm-connector.exe
+signtool sign /ph /fd "SHA256" /ac "C:\Program Files (x86)\Windows Kits\10\crosscertificates\DigiCert_High_Assurance_EV_Root_CA.crt" /sha1 "e3d2c802499e8837c3affdb6ca3c4448497ae317" /t "http://timestamp.digicert.com" /d "YubiHSM Connector" ..\..\bin\yubihsm-connector.exe
