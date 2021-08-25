@@ -26,6 +26,9 @@ jobs:
           go build -o bin/yubihsm-connector.exe
           cp bin/yubihsm-connector.exe artifact\
 
+          ./bin/yubihsm-connector.exe version
+          ./bin/yubihsm-connector.exe --help
+
           cd resources/win-installer
           & cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsMSBuildCmd.bat" && msbuild YubiHSMConnectorInstaller.sln /p:Configuration=Release'
 

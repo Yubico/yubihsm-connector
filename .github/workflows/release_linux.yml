@@ -15,7 +15,7 @@ jobs:
         run: |
           set -e -o pipefail
           set -x
-          mkdir artifact
+          mkdir -p artifact/yubihsm-connector
 
           sudo apt-get update && sudo  apt-get dist-upgrade -y
           sudo apt-get install -y libusb-1.0.0-dev
@@ -35,9 +35,17 @@ jobs:
           strip --strip-all bin/yubihsm-connector
           version=`bin/yubihsm-connector version`
           go-bin-deb generate -f deb/deb.json -a amd64 --version=${version}-1
-          cp *.deb artifact
+          cp *.deb artifact/yubihsm-connector
 
+          ./bin/yubihsm-connector version
           ./bin/yubihsm-connector --help
+
+          LICESE_DIR="artifact/yubihsm-connector/share/yubihsm-connector"
+          mkdir -p $LICESE_DIR
+          cp -r resources/release/licenses $LICESE_DIR/
+          for lf in $LICESE_DIR/licenses/*; do
+            chmod 644 $lf
+          done
 
       - name: Upload artifact
         uses: actions/upload-artifact@v1
@@ -57,7 +65,7 @@ jobs:
         run: |
           set -e -o pipefail
           set -x
-          mkdir artifact
+          mkdir -p artifact/yubihsm-connector
 
           sudo apt-get update && sudo  apt-get dist-upgrade -y
           sudo apt-get install -y libusb-1.0.0-dev
@@ -77,9 +85,17 @@ jobs:
           strip --strip-all bin/yubihsm-connector
           version=`bin/yubihsm-connector version`
           go-bin-deb generate -f deb/deb.json -a amd64 --version=${version}-1
-          cp *.deb artifact
+          cp *.deb artifact/yubihsm-connector
 
+          ./bin/yubihsm-connector version
           ./bin/yubihsm-connector --help
+
+          LICESE_DIR="artifact/yubihsm-connector/share/yubihsm-connector"
+          mkdir -p $LICESE_DIR
+          cp -r resources/release/licenses $LICESE_DIR/
+          for lf in $LICESE_DIR/licenses/*; do
+            chmod 644 $lf
+          done
 
       - name: Upload artifact
         uses: actions/upload-artifact@v1
@@ -99,7 +115,7 @@ jobs:
         run: |
           set -e -o pipefail
           set -x
-          mkdir artifact
+          mkdir -p artifact/yubihsm-connector
 
           sudo apt-get update && sudo  apt-get dist-upgrade -y
           sudo apt-get install -y libusb-1.0.0-dev
@@ -119,9 +135,17 @@ jobs:
           strip --strip-all bin/yubihsm-connector
           version=`bin/yubihsm-connector version`
           go-bin-deb generate -f deb/deb.json -a amd64 --version=${version}-1
-          cp *.deb artifact
+          cp *.deb artifact/yubihsm-connector
 
+          ./bin/yubihsm-connector version
           ./bin/yubihsm-connector --help
+
+          LICESE_DIR="artifact/yubihsm-connector/share/yubihsm-connector"
+          mkdir -p $LICESE_DIR
+          cp -r resources/release/licenses $LICESE_DIR/
+          for lf in $LICESE_DIR/licenses/*; do
+            chmod 644 $lf
+          done
 
       - name: Upload artifact
         uses: actions/upload-artifact@v1

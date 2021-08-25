@@ -24,6 +24,7 @@ jobs:
           strip -u -r bin/yubihsm-connector*
           cp bin/yubihsm-connector artifact
 
+          ./bin/yubihsm-connector version
           ./bin/yubihsm-connector --help
 
       - name: Upload artifact
