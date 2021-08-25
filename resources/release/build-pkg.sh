@@ -24,8 +24,9 @@ fi
 
 export INPUT=/shared/
 export OUTPUT=/shared/resources/release/build/$PLATFORM/yubihsm-connector
-rm -rf "${OUTPUT}"
-mkdir -p "${OUTPUT}"
+rm -rf $OUTPUT
+mkdir -p $OUTPUT
+
 pushd "/tmp" &>/dev/null
   rm -rf yubihsm-connector
   git clone "$INPUT" yubihsm-connector
@@ -38,15 +39,17 @@ pushd "/tmp" &>/dev/null
   popd &>/dev/null
 popd &>/dev/null
 
+LICESE_DIR="$OUTPUT/share/yubihsm-connector"
+mkdir -p $LICESE_DIR
 pushd "/shared" &>/dev/null
-  cp -r resources/release/licenses "$OUTPUT/"
-  for lf in $OUTPUT/licenses/*; do
+  cp -r resources/release/licenses $LICESE_DIR/
+  for lf in $LICESE_DIR/licenses/*; do
 	  chmod 644 $lf
   done
 
   pushd "$OUTPUT" &>/dev/null
-    rm -f "yubihsm-connector-$PLATFORM-amd64.tar.gz"
-    tar -C ".." -zcvf "../yubihsm-connector-$PLATFORM-amd64.tar.gz" "yubihsm-connector"
+    rm -f yubihsm-connector-$PLATFORM-amd64.tar.gz
+    tar -C .. -zcvf ../yubihsm-connector-$PLATFORM-amd64.tar.gz yubihsm-connector
     rm -f *.deb
     rm -rf licenses
     rm -rf ../yubihsm-connector
