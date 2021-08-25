@@ -43,8 +43,6 @@ fi
 
 export INPUT=/shared
 export OUTPUT=/shared/resources/release/build/$PLATFORM/yubihsm-connector
-
-#/shared/scripts/build-rpm.sh
 rm -rf "${OUTPUT}"
 mkdir -p "${OUTPUT}"
 
@@ -59,15 +57,14 @@ go version
 rpmbuild -bb $RPM_DIR/SPECS/yubihsm-connector.spec
 cp $RPM_DIR/RPMS/x86_64/*.rpm $OUTPUT
 
+LICENSE_DIR="$OUTPUT/share/yubihsm-connector"
+mkdir -p $LICENSE_DIR
 pushd "/shared" &>/dev/null
-  #PLATFORM=centos7 scripts/release.sh
-  cp -r resources/release/licenses "$OUTPUT/"
-  for lf in $OUTPUT/licenses/*; do
+  cp -r resources/release/licenses $LICENSE_DIR/
+  for lf in $LICENSE_DIR/licenses/*; do
 	  chmod 644 $lf
   done
 
-  #rm -f "yubihsm-connector-$PLATFORM-amd64.tar.gz"
-  #tar -C "resources/release/build/$PLATFORM/" -zcvf "yubihsm-connector-$PLATFORM-amd64.tar.gz" "yubihsm-connector"
   pushd "$OUTPUT" &>/dev/null
     rm -f "yubihsm-connector-$PLATFORM-amd64.tar.gz"
     tar -C ".." -zcvf "../yubihsm-connector-$PLATFORM-amd64.tar.gz" "yubihsm-connector"

@@ -49,7 +49,6 @@ Vagrant.configure("2") do |config|
     debian10.vm.provision "shell", :path => "build-pkg.sh", :args => "debian10", :privileged => false
   end
 
-
   config.vm.define "trusty" do |trusty|
     trusty.vm.box = "ubuntu/trusty64"
     trusty.vm.synced_folder "../..", "/shared"
@@ -73,13 +72,6 @@ Vagrant.configure("2") do |config|
     focal.vm.synced_folder "../..", "/shared", type: "rsync",
       rsync__args: ["--verbose", "--archive", "-z", "--copy-links"]
     focal.vm.provision "shell", :path => "build-pkg.sh", :args => "ubuntu2004", :privileged => false
-  end
-
-  config.vm.define "groovy" do |groovy|
-    groovy.vm.box = "ubuntu/groovy64"
-    groovy.vm.synced_folder "../..", "/shared", type: "rsync",
-      rsync__args: ["--verbose", "--archive", "-z", "--copy-links"]
-    groovy.vm.provision "shell", :path => "build-pkg.sh", :args => "ubuntu2010", :privileged => false
   end
 
   config.vm.define "hirsute" do |hirsute|
