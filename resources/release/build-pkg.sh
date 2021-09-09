@@ -12,7 +12,7 @@ sudo apt-get install -y build-essential libusb-1.0.0-dev pkg-config chrpath git
 
 export PATH=$PATH:/usr/local/go/bin:~/go/bin
 if [[ ! -x $(command -v go ) ]]; then
-  curl -L --max-redirs 2 -o - https://golang.org/dl/go1.14.15.linux-amd64.tar.gz |\
+  curl -L --max-redirs 2 -o - https://golang.org/dl/go1.17.linux-amd64.tar.gz |\
     sudo tar -C /usr/local -xzvf -
 fi
 if [[ ! -x $(command -v go-bin-deb) ]]; then
