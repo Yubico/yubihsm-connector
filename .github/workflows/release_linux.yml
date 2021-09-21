@@ -3,55 +3,6 @@ name: "Building release binaries on Linux"
 on: [push]
 
 jobs:
-  Ubuntu1604-Build:
-    name: Ubuntu1604
-    runs-on: ubuntu-16.04
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Build binary
-        run: |
-          set -e -o pipefail
-          set -x
-          mkdir -p artifact/yubihsm-connector
-
-          sudo apt-get update && sudo  apt-get dist-upgrade -y
-          sudo apt-get install -y libusb-1.0.0-dev
-
-          export PATH=$PATH:/usr/local/go/bin:~/go/bin
-          if [[ ! -x $(command -v go ) ]]; then
-            curl -L --max-redirs 2 -o - https://golang.org/dl/go1.17.linux-amd64.tar.gz |\
-              sudo tar -C /usr/local -xzvf -
-          fi
-          if [[ ! -x $(command -v go-bin-deb) ]]; then
-            curl -L -o go-bin-deb.dpkg https://github.com/mh-cbon/go-bin-deb/releases/download/0.0.19/go-bin-deb-amd64.deb
-            sudo dpkg -i go-bin-deb.dpkg
-            sudo apt-get install --fix-missing
-          fi
-
-          make
-          strip --strip-all bin/yubihsm-connector
-          version=`bin/yubihsm-connector version`
-          go-bin-deb generate -f deb/deb.json -a amd64 --version=${version}-1
-          cp *.deb artifact/yubihsm-connector
-
-          ./bin/yubihsm-connector version
-          ./bin/yubihsm-connector --help
-
-          LICESE_DIR="artifact/yubihsm-connector/share/yubihsm-connector"
-          mkdir -p $LICESE_DIR
-          cp -r resources/release/licenses $LICESE_DIR/
-          for lf in $LICESE_DIR/licenses/*; do
-            chmod 644 $lf
-          done
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v1
-        with:
-          name: yubihsm-connector-ubuntu1604-amd64
-          path: artifact
 
   Ubuntu1804-Build:
     name: Ubuntu1804
