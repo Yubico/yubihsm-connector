@@ -4,7 +4,9 @@
 
 The connector is self documenting, peruse the `--help`'s.
 
-....
+[source,console]
+----
+$ yubihsm-connector --help
 YubiHSM Connector
 
 Usage:
@@ -20,7 +22,7 @@ Flags:
   -d, --debug           debug output
 
 Use "yubihsm-connector [command] --help" for more information about a command.
-....
+----
 
 == Development
 
@@ -32,32 +34,36 @@ Use "yubihsm-connector [command] --help" for more information about a command.
 
 === pre-commit
 
-....
+[source,console]
+----
 $ pre-commit install
-....
+----
 
 See the configured [hooks](.pre-commit-config.yaml) for details.
 
 === Building
 
-....
+[source,console]
+----
 $ make
-....
+----
 
 === Cross-compiling for Windows
 
 To make this work you need to have mingw-w64 installed.
 
-....
-GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc go build
-....
+[source,console]
+----
+$ GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc go build
+----
 
 === Linting
 
-....
+[source,console]
+----
 $ make vet
 $ make fmt
-....
+----
 
 === License
 
