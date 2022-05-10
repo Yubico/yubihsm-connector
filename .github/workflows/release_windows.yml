@@ -21,7 +21,7 @@ jobs:
           refreshenv
           go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo
           $env:Path += ";C:\Users\runneradmin\go\bin"
-
+          go mod tidy
           go generate ./...
           go build -o bin/yubihsm-connector.exe
           cp bin/yubihsm-connector.exe artifact\
@@ -30,8 +30,7 @@ jobs:
           ./bin/yubihsm-connector.exe --help
 
           cd resources/win-installer
-          & cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsMSBuildCmd.bat" && msbuild YubiHSMConnectorInstaller.sln /p:Configuration=Release'
-
+          & cmd /c '"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsMSBuildCmd.bat" && msbuild YubiHSMConnectorInstaller.sln /p:Configuration=Release'
           cp x64/Release/yubihsm-connector-windows-amd64.msi ../../artifact/
 
       - name: Upload artifact
