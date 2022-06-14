@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
-	<?define ProductVersion="3.0.2" ?>
+	<?define ProductVersion="3.0.3" ?>
 	<?define ProductName="YubiHSM Connector" ?>
 	<Product Id="*" Name="$(var.ProductName)" Language="1033" Version="$(var.ProductVersion)" Manufacturer="Yubico AB" UpgradeCode="3730310e-468e-4f46-b1f3-2b0c53673470">
 		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine"  Description="$(var.ProductName) $(var.ProductVersion)" />
