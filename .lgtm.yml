@@ -1,6 +1,0 @@
----
-extraction:
-  go:
-    prepare:
-      packages:
-        - libusb-1.0-0-dev
