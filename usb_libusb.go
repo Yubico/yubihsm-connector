@@ -188,7 +188,7 @@ func usbwrite(buf []byte, cid string) (err error) {
 	var ctx context.Context
 
 	ctx = context.Background()
-   	if n, err = state.wendpoint.WriteContext(ctx, buf); err != nil {
+	if n, err = state.wendpoint.WriteContext(ctx, buf); err != nil {
 		goto out
 	}
 	if len(buf)%64 == 0 {
@@ -216,12 +216,12 @@ func usbread(cid string, timeout time.Duration) (buf []byte, err error) {
 
 	buf = make([]byte, 8192)
 	ctx = context.Background()
-    	if timeout > 0 {
-    		var cancel func()
-    		ctx, cancel = context.WithTimeout(ctx, timeout)
-    		defer cancel()
-    	}
-    	if n, err = state.rendpoint.ReadContext(ctx, buf); err != nil {
+	if timeout > 0 {
+		var cancel func()
+		ctx, cancel = context.WithTimeout(ctx, timeout)
+		defer cancel()
+	}
+	if n, err = state.rendpoint.ReadContext(ctx, buf); err != nil {
 		buf = buf[:0]
 		goto out
 	}
