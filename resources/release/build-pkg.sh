@@ -7,7 +7,7 @@ PLATFORM=$1
 export DEBIAN_FRONTEND=noninteractive
 
 sudo apt-get update && sudo  apt-get dist-upgrade -y
-sudo apt-get install -y build-essential libusb-1.0.0-dev pkg-config chrpath git
+sudo apt-get install -y build-essential libusb-1.0.0-dev pkg-config chrpath git curl
 
 
 export PATH=$PATH:/usr/local/go/bin:~/go/bin

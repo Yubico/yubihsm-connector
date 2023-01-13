@@ -1,5 +1,5 @@
 Name:		yubihsm-connector
-Version:	3.0.3
+Version:	3.0.4
 Release:	1%{?dist}
 Summary:	USB to HTTP bridge for the YubiHSM
 

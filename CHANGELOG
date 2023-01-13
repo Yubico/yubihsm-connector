@@ -1,0 +1,17 @@
+=== Version 3.0.4
+
+* Add changelog
+* Minor code improvement
+
+=== Version 3.0.3
+
+* Dependency update
+
+=== Version 3.0.2
+
+* Timeout functionality deprecated
+
+=== Version 3.0.1
+
+* Security update for YSA-2021-02
+* Improved compatibility with ESXi
