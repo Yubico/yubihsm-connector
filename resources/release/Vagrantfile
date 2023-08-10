@@ -22,6 +22,13 @@ Vagrant.configure("2") do |config|
     fedora37.vm.provision "shell", :path => "build-rpm.sh", :args => "fedora37", :privileged => false
   end
 
+  config.vm.define "fedora38" do |fedora38|
+    fedora38.vm.box = "fedora/38-cloud-base"
+    fedora38.vm.synced_folder "../..", "/shared", type: "rsync",
+      rsync__args: ["--verbose", "--archive", "-z", "--delete"]
+    fedora38.vm.provision "shell", :path => "build-rpm.sh", :args => "fedora38", :privileged => false
+  end
+
   config.vm.define "centos7" do |centos7|
     centos7.vm.box = "centos/7"
     centos7.vm.synced_folder "../..", "/shared", type: "rsync",
@@ -48,7 +55,6 @@ Vagrant.configure("2") do |config|
       rsync__args: ["--verbose", "--archive", "-z", "--delete"]
     debian11.vm.provision "shell", :path => "build-pkg.sh", :args => "debian11", :privileged => false
   end
-
 
   config.vm.define "trusty" do |trusty|
     trusty.vm.box = "ubuntu/trusty64"
@@ -87,6 +93,13 @@ Vagrant.configure("2") do |config|
     kinetic.vm.synced_folder "../..", "/shared", type: "rsync",
       rsync__args: ["--verbose", "--archive", "-z", "--copy-links"]
     kinetic.vm.provision "shell", :path => "build-pkg.sh", :args => "ubuntu2210", :privileged => false
+  end
+
+  config.vm.define "lunar" do |lunar|
+    lunar.vm.box = "ubuntu/lunar64"
+    lunar.vm.synced_folder "../..", "/shared", type: "rsync",
+      rsync__args: ["--verbose", "--archive", "-z", "--copy-links"]
+    lunar.vm.provision "shell", :path => "build-pkg.sh", :args => "ubuntu2304", :privileged => false
   end
 
 end

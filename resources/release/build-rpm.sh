@@ -31,7 +31,7 @@ elif [ "$PLATFORM" == "centos8" ]; then
 
 elif [ "${PLATFORM:0:6}" == "fedora" ]; then
   sudo dnf -y update
-  sudo dnf -y install gcc binutils git make libusb-devel rpmdevtools
+  sudo dnf -y install gcc binutils git make libusb1-devel rpmdevtools
 fi
 
 

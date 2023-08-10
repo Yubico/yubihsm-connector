@@ -21,6 +21,9 @@ if [[ ! -x $(command -v go-bin-deb) ]]; then
   sudo apt-get install --fix-missing
 fi
 
+if [ "$PLATFORM" == "ubuntu1404" ]; then
+  export CXXFLAGS="-stdlib=libstdc++" CC=/usr/bin/gcc CXX=/usr/bin/g++
+fi
 
 export INPUT=/shared/
 export OUTPUT=/shared/resources/release/build/$PLATFORM/yubihsm-connector
