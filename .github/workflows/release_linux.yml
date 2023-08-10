@@ -139,18 +139,18 @@ jobs:
           set -x
           mkdir -p artifact/yubihsm-connector
 
-          sudo apt-get update && sudo  apt-get dist-upgrade -y
-          sudo apt-get install -y libusb-1.0.0-dev
+          apt-get update && apt-get dist-upgrade -y
+          apt-get install -y libusb-1.0.0-dev
 
           export PATH=$PATH:/usr/local/go/bin:~/go/bin
           if [[ ! -x $(command -v go ) ]]; then
             curl -L --max-redirs 2 -o - https://golang.org/dl/go1.17.linux-amd64.tar.gz |\
-              sudo tar -C /usr/local -xzvf -
+              tar -C /usr/local -xzvf -
           fi
           if [[ ! -x $(command -v go-bin-deb) ]]; then
             curl -L -o go-bin-deb.dpkg https://github.com/mh-cbon/go-bin-deb/releases/download/0.0.19/go-bin-deb-amd64.deb
-            sudo dpkg -i go-bin-deb.dpkg
-            sudo apt-get install --fix-missing
+            dpkg -i go-bin-deb.dpkg
+            apt-get install --fix-missing
           fi
 
           make
