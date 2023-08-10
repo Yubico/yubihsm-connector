@@ -143,15 +143,12 @@ jobs:
           apt-get install -y libusb-1.0.0-dev
 
           export PATH=$PATH:/usr/local/go/bin:~/go/bin
-          if [[ ! -x $(command -v go ) ]]; then
-            curl -L --max-redirs 2 -o - https://golang.org/dl/go1.17.linux-amd64.tar.gz |\
+          curl -L --max-redirs 2 -o - https://golang.org/dl/go1.17.linux-amd64.tar.gz |\
               tar -C /usr/local -xzvf -
-          fi
-          if [[ ! -x $(command -v go-bin-deb) ]]; then
-            curl -L -o go-bin-deb.dpkg https://github.com/mh-cbon/go-bin-deb/releases/download/0.0.19/go-bin-deb-amd64.deb
-            dpkg -i go-bin-deb.dpkg
-            apt-get install --fix-missing
-          fi
+
+          curl -L -o go-bin-deb.dpkg https://github.com/mh-cbon/go-bin-deb/releases/download/0.0.19/go-bin-deb-amd64.deb
+          dpkg -i go-bin-deb.dpkg
+          apt-get install --fix-missing
 
           make
           strip --strip-all bin/yubihsm-connector
