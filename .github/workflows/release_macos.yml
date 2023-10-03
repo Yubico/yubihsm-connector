@@ -5,7 +5,7 @@ on: [push]
 jobs:
   MacOS-Build:
 
-    runs-on: macos-10.15
+    runs-on: macos-latest
 
     steps:
       - name: Checkout repository
