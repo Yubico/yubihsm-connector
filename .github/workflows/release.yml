@@ -1,0 +1,284 @@
+name: Release binaries
+# This machine tests building the software on a both 32 and 64 Windows architecture.
+
+on: [push]
+
+jobs:
+
+  source:
+    name: Build source release
+    runs-on: ubuntu-latest
+    env:
+      VERSION: 3.0.4
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: Make source release
+        run: |
+          set -e -o pipefail
+          set -x
+          
+          sudo apt-get update && sudo  apt-get dist-upgrade -y
+          
+          mkdir -p artifact/yubihsm-connector
+          tar --exclude .git --exclude .github --transform="s/^\./yubihsm-connector-$VERSION/" -czf yubihsm-connector-$VERSION.tar.gz .
+          cp yubihsm-connector-$VERSION.tar.gz artifact/yubihsm-connector
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: yubihsm-connector-src
+          path: artifact
+
+  Windowsx-build:
+    name: Build Windows release binaries
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/download-artifact@v3
+
+      - name: Build and make MSI installer
+        run: |
+          $ErrorActionPreference = "Stop"
+          Set-PSDebug -Trace 1
+          mkdir artifact
+
+          choco install -y golang --version=1.17
+          refreshenv
+          go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo
+          $env:Path += ";C:\Users\runneradmin\go\bin"
+          go mod tidy
+          go generate ./...
+          go build -o bin/yubihsm-connector.exe
+          cp bin/yubihsm-connector.exe artifact\
+          
+          ./bin/yubihsm-connector.exe version
+          ./bin/yubihsm-connector.exe --help
+          
+          cd resources/win-installer
+          & cmd /c '"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsMSBuildCmd.bat" && msbuild YubiHSMConnectorInstaller.sln /p:Configuration=Release'
+          cp x64/Release/yubihsm-connector-windows-amd64.msi ../../artifact/          
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: yubihsm-connector-windows-amd64
+          path: artifact
+
+  macos-build:
+    name: Build MacOS release binaries
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            arch: amd
+          - os: macos-latest-xlarge
+            arch: arm
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Build and make MSI installer
+        run: |
+          set -e -o pipefail
+          set -x
+          mkdir artifact
+          
+          brew install go
+          
+          make GB_BUILD_FLAGS="-tags disable_seccomp -ldflags '-s'"
+          strip -u -r bin/yubihsm-connector*
+          cp bin/yubihsm-connector artifact
+
+          ./bin/yubihsm-connector version
+          ./bin/yubihsm-connector --help          
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: yubihsm-connector-mac-${{ matrix.arch }}64
+          path: artifact
+
+  debian_based:
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: [
+          "ubuntu:23.10",
+          "ubuntu:23.04",
+          "ubuntu:22.04",
+          "ubuntu:20.04",
+          "ubuntu:18.04",
+          "ubuntu:16.04",
+          "ubuntu:14.04",
+          "debian:12",
+          "debian:11",
+          "debian:10"
+        ]
+        # perform gcc builds for all environments
+        cc: [ "gcc" ]
+
+    name: build on ${{ matrix.environment }}
+    runs-on: ubuntu-latest
+    container: ${{ matrix.environment }}
+
+    steps:
+
+      - name: install dependencies from package management
+        env:
+          CC: ${{ matrix.cc }}
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+
+          sudo apt-get update && sudo  apt-get dist-upgrade -y
+          sudo apt-get install -y build-essential libusb-1.0.0-dev pkg-config chrpath git curl go
+          
+          if [[ ! -x $(command -v go-bin-deb) ]]; then
+            curl -L -o go-bin-deb.dpkg https://github.com/mh-cbon/go-bin-deb/releases/download/0.0.19/go-bin-deb-amd64.deb
+            sudo dpkg -i go-bin-deb.dpkg
+            sudo apt-get install --fix-missing
+          fi          
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: extract platform name
+        env:
+          DOCKER_IMAGE: ${{ matrix.environment }}
+        run: |
+          # Remove everything from DOCKER_IMAGE that is not a letter or a number
+          PLATFORM=$(echo -n "$DOCKER_IMAGE" | sed -E 's/[^a-zA-Z0-9]//g')
+          echo "PLATFORM=$PLATFORM" >> $GITHUB_ENV
+
+      - name: build release
+        working-directory: yubihsm-connector
+        env:
+          PLATFORM: ${{ env.PLATFORM }}
+        run: |
+          set -e -o pipefail
+          set -x
+          mkdir -p artifact/yubihsm-connector
+
+          if [ $PLATFORM == "ubuntu1404" ]; then
+            export CXXFLAGS="-stdlib=libstdc++" CC=/usr/bin/gcc CXX=/usr/bin/g++
+          fi
+          
+          make
+          strip --strip-all bin/yubihsm-connector
+          version=`bin/yubihsm-connector version`
+          go-bin-deb generate -f deb/deb.json -a amd64 --version=${version}-1
+          cp *.deb artifact/yubihsm-connector
+
+          LICESE_DIR="artifact/yubihsm-connector/share/yubihsm-connector"
+          mkdir -p $LICESE_DIR
+          cp -r resources/release/licenses $LICESE_DIR/
+          for lf in $LICESE_DIR/licenses/*; do
+            chmod 644 $lf
+          done
+
+          cd artifact
+          tar -C ".." -zcvf "yubihsm-connector-$PLATFORM-amd64.tar.gz" "yubihsm-connector"
+
+      - name: install binaries
+        run: |
+          set -x
+          dpkg -i ./yubihsm-connector_*.deb
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: "yubihsm-connector-${{ env.PLATFORM }}-amd64"
+          path: artifact
+
+  redhat_based:
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: [
+          "fedora:37",
+          "fedora:38",
+          "centos:7"
+        ]
+
+    name: build on ${{ matrix.environment }}
+    runs-on: ubuntu-latest
+    container: ${{ matrix.environment }}
+
+    steps:
+
+      - name: checkout repository
+        uses: actions/checkout@v3
+
+      - name: extract platform name
+        env:
+          DOCKER_IMAGE: ${{ matrix.environment }}
+        run: |
+          # Remove everything from DOCKER_IMAGE that is not a letter or a number
+          PLATFORM=$(echo -n "$DOCKER_IMAGE" | sed -E 's/[^a-zA-Z0-9]//g')
+          echo "PLATFORM=$PLATFORM" >> $GITHUB_ENV
+
+      - name: install dependencies
+        env:
+          PLATFORM: ${{ env.PLATFORM }}
+        run: |
+          cd yubihsm-shell/resources/release/linux
+          ./install_redhat_dependencies.sh $PLATFORM
+
+          if [ $PLATFORM = "centos7" ]; then
+            sudo yum -y install centos-release-scl
+            sudo yum -y update && sudo yum -y upgrade
+            sudo yum -y install devtoolset-7-gcc     \
+                              devtoolset-7-gcc-c++ \
+                              devtoolset-7-make    \
+                              chrpath              \
+                              git                  \
+                              libusbx-devel        \
+                              libseccomp-devel     \
+                              rpm-build            \
+                              redhat-rpm-config    \
+                              go
+            . /opt/rh/devtoolset-7/enable
+          else
+            sudo dnf -y update
+            sudo dnf -y install gcc binutils git make libusb1-devel rpmdevtools go
+          fi
+
+      - name: build release binaries
+        working-directory: yubihsm-connector
+        env:
+          PLATFORM: ${{ env.PLATFORM }}
+        run: |
+          mkdir -p artifact/yubihsm-connector
+          
+          mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+          echo '%_topdir %(echo $HOME)/rpmbuild' > ~/.rpmmacros
+          
+          RPM_DIR=$GITHUB_WORKSPACE/rpmbuild
+          cp resources/release/yubihsm-connector.spec $RPM_DIR/SPECS/
+          
+          rpmbuild -bb $RPM_DIR/SPECS/yubihsm-connector.spec
+          cp $RPM_DIR/RPMS/x86_64/*.rpm artifact/yubihsm-connector/
+
+          LICENSE_DIR="artifact/yubihsm-connector"
+          mkdir -p $LICENSE_DIR
+          cp -r resources/release/licenses $LICENSE_DIR/
+          for lf in $LICENSE_DIR/licenses/*; do
+            chmod 644 $lf
+          done
+          
+          cd artifact
+          tar -C ".." -zcvf "yubihsm-connector-$PLATFORM-amd64.tar.gz" "yubihsm-connector"
+
+      - name: install binaries
+        working-directory: /github/home/rpmbuild/RPMS/x86_64
+        run: |
+          yum install -y $GITHUB_WORKSPACE/rpmbuild/RPMS/x86_64/yubihsm-connector-*.rpm
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: "yubihsm-connector-${{ env.PLATFORM }}-amd64"
