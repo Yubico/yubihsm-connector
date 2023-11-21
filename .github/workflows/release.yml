@@ -22,7 +22,9 @@ jobs:
           sudo apt-get update && sudo  apt-get dist-upgrade -y
           
           mkdir -p artifact/yubihsm-connector
-          tar --exclude .git --exclude .github --transform="s/^\./yubihsm-connector-$VERSION/" -czf yubihsm-connector-$VERSION.tar.gz ../
+          tar --exclude .git --exclude .github --transform="s/^\./yubihsm-connector-$VERSION/" -czf yubihsm-connector-$VERSION.tar.gz .
+          pwd
+          ls
           cp ../yubihsm-connector-$VERSION.tar.gz artifact/yubihsm-connector
 
       - name: Upload artifact
@@ -44,12 +46,13 @@ jobs:
           Set-PSDebug -Trace 1
           mkdir artifact
 
-          choco install -y golang
+          choco install -y golang 
           refreshenv
           go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo
           $env:Path += ";C:\Users\runneradmin\go\bin"
           
           pwd
+          ls
           
           go mod tidy
           go generate ./...
@@ -89,10 +92,11 @@ jobs:
           set -e -o pipefail
           set -x
           mkdir artifact
+          mkdir $GITHUB_WORKSPACE/go
           
           curl -L --max-redirs 2 -o - https://golang.org/dl/go1.17.darwin-amd64.tar.gz |\
               tar xf - -C $GITHUB_WORKSPACE/go
-          export PATH=$PATH:$GITHUB_WORKSPACE/go/go/bin          
+          export PATH=$PATH:$GITHUB_WORKSPACE/go/bin          
                     
           make GB_BUILD_FLAGS="-tags disable_seccomp -ldflags '-s'"
           strip -u -r bin/yubihsm-connector*
@@ -169,7 +173,6 @@ jobs:
         env:
           PLATFORM: ${{ env.PLATFORM }}
         run: |
-          set -e -o pipefail
           set -x
           mkdir -p artifact/yubihsm-connector
           export PATH=$PATH:/usr/local/go/bin:~/go/bin
@@ -267,8 +270,8 @@ jobs:
           mkdir -p artifact/yubihsm-connector
           export PATH=$PATH:/usr/local/go/bin:~/go/bin
           
-          mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
-          echo '%_topdir %(echo $HOME)/rpmbuild' > ~/.rpmmacros
+          mkdir -p $GITHUB_WORKSPACE/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+          echo '%_topdir %(echo $GITHUB_WORKSPACE)/rpmbuild' > $GITHUB_WORKSPACE/.rpmmacros
           
           RPM_DIR=$GITHUB_WORKSPACE/rpmbuild
           cp resources/release/yubihsm-connector.spec $RPM_DIR/SPECS/
