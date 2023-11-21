@@ -44,7 +44,7 @@ jobs:
           Set-PSDebug -Trace 1
           mkdir artifact
 
-          choco install -y golang --version=1.17
+          choco install -y golang
           refreshenv
           go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo
           $env:Path += ";C:\Users\runneradmin\go\bin"
@@ -86,9 +86,7 @@ jobs:
           set -e -o pipefail
           set -x
           mkdir artifact
-          
-          brew install go
-          
+                    
           make GB_BUILD_FLAGS="-tags disable_seccomp -ldflags '-s'"
           strip -u -r bin/yubihsm-connector*
           cp bin/yubihsm-connector artifact
@@ -134,13 +132,13 @@ jobs:
         run: |
           export DEBIAN_FRONTEND=noninteractive
 
-          sudo apt-get update && sudo  apt-get dist-upgrade -y
-          sudo apt-get install -y build-essential libusb-1.0.0-dev pkg-config chrpath git curl go
+          apt-get update && apt-get dist-upgrade -y
+          apt-get install -y build-essential libusb-1.0.0-dev pkg-config chrpath git curl go
           
           if [[ ! -x $(command -v go-bin-deb) ]]; then
             curl -L -o go-bin-deb.dpkg https://github.com/mh-cbon/go-bin-deb/releases/download/0.0.19/go-bin-deb-amd64.deb
-            sudo dpkg -i go-bin-deb.dpkg
-            sudo apt-get install --fix-missing
+            dpkg -i go-bin-deb.dpkg
+            apt-get install --fix-missing
           fi          
 
       - name: Checkout repository
@@ -229,9 +227,9 @@ jobs:
           ./install_redhat_dependencies.sh $PLATFORM
 
           if [ $PLATFORM = "centos7" ]; then
-            sudo yum -y install centos-release-scl
-            sudo yum -y update && sudo yum -y upgrade
-            sudo yum -y install devtoolset-7-gcc     \
+            yum -y install centos-release-scl
+            yum -y update && yum -y upgrade
+            yum -y install devtoolset-7-gcc     \
                               devtoolset-7-gcc-c++ \
                               devtoolset-7-make    \
                               chrpath              \
@@ -243,8 +241,8 @@ jobs:
                               go
             . /opt/rh/devtoolset-7/enable
           else
-            sudo dnf -y update
-            sudo dnf -y install gcc binutils git make libusb1-devel rpmdevtools go
+            dnf -y update
+            dnf -y install gcc binutils git make libusb1-devel rpmdevtools go
           fi
 
       - name: build release binaries
