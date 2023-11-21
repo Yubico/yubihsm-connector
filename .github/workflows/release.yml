@@ -22,8 +22,8 @@ jobs:
           sudo apt-get update && sudo  apt-get dist-upgrade -y
           
           mkdir -p artifact/yubihsm-connector
-          tar --exclude .git --exclude .github --transform="s/^\./yubihsm-connector-$VERSION/" -czf yubihsm-connector-$VERSION.tar.gz .
-          cp yubihsm-connector-$VERSION.tar.gz artifact/yubihsm-connector
+          tar --exclude .git --exclude .github --transform="s/^\./yubihsm-connector-$VERSION/" -czf yubihsm-connector-$VERSION.tar.gz ../
+          cp ../yubihsm-connector-$VERSION.tar.gz artifact/yubihsm-connector
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
@@ -91,8 +91,8 @@ jobs:
           mkdir artifact
           
           curl -L --max-redirs 2 -o - https://golang.org/dl/go1.17.darwin-amd64.tar.gz |\
-              tar xf - -C /usr/local
-          export PATH=$PATH:/usr/local/go/bin:~/go/bin          
+              tar xf - -C $GITHUB_WORKSPACE/go
+          export PATH=$PATH:$GITHUB_WORKSPACE/go/go/bin          
                     
           make GB_BUILD_FLAGS="-tags disable_seccomp -ldflags '-s'"
           strip -u -r bin/yubihsm-connector*
@@ -140,7 +140,7 @@ jobs:
           export DEBIAN_FRONTEND=noninteractive
 
           apt-get update && apt-get dist-upgrade -y
-          apt-get install -y build-essential libusb-1.0.0-dev pkg-config chrpath git curl go
+          apt-get install -y build-essential libusb-1.0.0-dev pkg-config chrpath git curl
           
           export PATH=$PATH:/usr/local/go/bin:~/go/bin
           if [[ ! -x $(command -v go ) ]]; then
@@ -166,7 +166,6 @@ jobs:
           echo "PLATFORM=$PLATFORM" >> $GITHUB_ENV
 
       - name: build release
-        working-directory: yubihsm-connector
         env:
           PLATFORM: ${{ env.PLATFORM }}
         run: |
@@ -248,8 +247,7 @@ jobs:
                               libusbx-devel        \
                               libseccomp-devel     \
                               rpm-build            \
-                              redhat-rpm-config    \
-                              go
+                              redhat-rpm-config
             . /opt/rh/devtoolset-7/enable
           else
             dnf -y update
@@ -263,7 +261,6 @@ jobs:
           fi
 
       - name: build release binaries
-        working-directory: yubihsm-connector
         env:
           PLATFORM: ${{ env.PLATFORM }}
         run: |
