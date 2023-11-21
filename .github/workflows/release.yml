@@ -25,7 +25,7 @@ jobs:
           tar --exclude .git --exclude .github --transform="s/^\./yubihsm-connector-$VERSION/" -czf yubihsm-connector-$VERSION.tar.gz .
           pwd
           ls
-          cp ../yubihsm-connector-$VERSION.tar.gz artifact/yubihsm-connector
+          cp yubihsm-connector-$VERSION.tar.gz artifact/yubihsm-connector
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
@@ -46,10 +46,10 @@ jobs:
           Set-PSDebug -Trace 1
           mkdir artifact
 
+          pwd
+          ls
+
           choco install -y golang 
-          refreshenv
-          go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo
-          $env:Path += ";C:\Users\runneradmin\go\bin"
           
           pwd
           ls
@@ -92,11 +92,8 @@ jobs:
           set -e -o pipefail
           set -x
           mkdir artifact
-          mkdir $GITHUB_WORKSPACE/go
-          
-          curl -L --max-redirs 2 -o - https://golang.org/dl/go1.17.darwin-amd64.tar.gz |\
-              tar xf - -C $GITHUB_WORKSPACE/go
-          export PATH=$PATH:$GITHUB_WORKSPACE/go/bin          
+
+          brew install golang      
                     
           make GB_BUILD_FLAGS="-tags disable_seccomp -ldflags '-s'"
           strip -u -r bin/yubihsm-connector*
@@ -144,13 +141,7 @@ jobs:
           export DEBIAN_FRONTEND=noninteractive
 
           apt-get update && apt-get dist-upgrade -y
-          apt-get install -y build-essential libusb-1.0.0-dev pkg-config chrpath git curl
-          
-          export PATH=$PATH:/usr/local/go/bin:~/go/bin
-          if [[ ! -x $(command -v go ) ]]; then
-            curl -L --max-redirs 2 -o - https://golang.org/dl/go1.17.linux-amd64.tar.gz |\
-              tar -C /usr/local -xzvf -
-          fi
+          apt-get install -y build-essential libusb-1.0.0-dev pkg-config chrpath git curl golang
           
           if [[ ! -x $(command -v go-bin-deb) ]]; then
             curl -L -o go-bin-deb.dpkg https://github.com/mh-cbon/go-bin-deb/releases/download/0.0.19/go-bin-deb-amd64.deb
@@ -175,7 +166,6 @@ jobs:
         run: |
           set -x
           mkdir -p artifact/yubihsm-connector
-          export PATH=$PATH:/usr/local/go/bin:~/go/bin
 
           if [ $PLATFORM == "ubuntu1404" ]; then
             export CXXFLAGS="-stdlib=libstdc++" CC=/usr/bin/gcc CXX=/usr/bin/g++
