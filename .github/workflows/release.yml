@@ -48,6 +48,9 @@ jobs:
           refreshenv
           go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo
           $env:Path += ";C:\Users\runneradmin\go\bin"
+          
+          pwd
+          
           go mod tidy
           go generate ./...
           go build -o bin/yubihsm-connector.exe
@@ -86,6 +89,10 @@ jobs:
           set -e -o pipefail
           set -x
           mkdir artifact
+          
+          curl -L --max-redirs 2 -o - https://golang.org/dl/go1.17.darwin-amd64.tar.gz |\
+              tar xf - -C /usr/local
+          export PATH=$PATH:/usr/local/go/bin:~/go/bin          
                     
           make GB_BUILD_FLAGS="-tags disable_seccomp -ldflags '-s'"
           strip -u -r bin/yubihsm-connector*
@@ -135,6 +142,12 @@ jobs:
           apt-get update && apt-get dist-upgrade -y
           apt-get install -y build-essential libusb-1.0.0-dev pkg-config chrpath git curl go
           
+          export PATH=$PATH:/usr/local/go/bin:~/go/bin
+          if [[ ! -x $(command -v go ) ]]; then
+            curl -L --max-redirs 2 -o - https://golang.org/dl/go1.17.linux-amd64.tar.gz |\
+              tar -C /usr/local -xzvf -
+          fi
+          
           if [[ ! -x $(command -v go-bin-deb) ]]; then
             curl -L -o go-bin-deb.dpkg https://github.com/mh-cbon/go-bin-deb/releases/download/0.0.19/go-bin-deb-amd64.deb
             dpkg -i go-bin-deb.dpkg
@@ -160,6 +173,7 @@ jobs:
           set -e -o pipefail
           set -x
           mkdir -p artifact/yubihsm-connector
+          export PATH=$PATH:/usr/local/go/bin:~/go/bin
 
           if [ $PLATFORM == "ubuntu1404" ]; then
             export CXXFLAGS="-stdlib=libstdc++" CC=/usr/bin/gcc CXX=/usr/bin/g++
@@ -223,9 +237,6 @@ jobs:
         env:
           PLATFORM: ${{ env.PLATFORM }}
         run: |
-          cd yubihsm-shell/resources/release/linux
-          ./install_redhat_dependencies.sh $PLATFORM
-
           if [ $PLATFORM = "centos7" ]; then
             yum -y install centos-release-scl
             yum -y update && yum -y upgrade
@@ -244,6 +255,12 @@ jobs:
             dnf -y update
             dnf -y install gcc binutils git make libusb1-devel rpmdevtools go
           fi
+          
+          export PATH=$PATH:/usr/local/go/bin:~/go/bin
+          if [[ ! -x $(command -v go ) ]]; then
+            curl -L --max-redirs 2 -o - https://golang.org/dl/go1.17.linux-amd64.tar.gz |\
+            tar -C /usr/local -xzvf -
+          fi
 
       - name: build release binaries
         working-directory: yubihsm-connector
@@ -251,6 +268,7 @@ jobs:
           PLATFORM: ${{ env.PLATFORM }}
         run: |
           mkdir -p artifact/yubihsm-connector
+          export PATH=$PATH:/usr/local/go/bin:~/go/bin
           
           mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
           echo '%_topdir %(echo $HOME)/rpmbuild' > ~/.rpmmacros
