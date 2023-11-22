@@ -148,7 +148,7 @@ jobs:
           
           echo "PLATFORM = $PLATFORM"
           
-          if [ $PLATFORM = "ubuntu1804" ] || [ "$PLATFORM" = "ubuntu1604" ] || [ $PLATFORM == "ubuntu1404" ] || [ $PLATFORM == "debian10" ]; then
+          if [ $PLATFORM = "ubuntu1804" ] || [ "$PLATFORM" = "ubuntu1604" ] || [ $PLATFORM = "ubuntu1404" ] || [ $PLATFORM = "debian10" ]; then
             curl -L --max-redirs 2 -o - https://golang.org/dl/go1.17.linux-amd64.tar.gz |\
               tar -C /usr/local -xzvf -
           else
@@ -247,8 +247,10 @@ jobs:
                               rpm-build            \
                               redhat-rpm-config
             . /opt/rh/devtoolset-7/enable
-          
-            yum -y install golang
+
+            curl -L --max-redirs 2 -o - https://golang.org/dl/go1.17.linux-amd64.tar.gz |\
+              tar -C /usr/local -xzvf -          
+
           else
             dnf -y update
             dnf -y install gcc binutils git make libusb1-devel rpmdevtools golang
@@ -258,6 +260,7 @@ jobs:
         env:
           PLATFORM: ${{ env.PLATFORM }}
         run: |
+          export PATH=$PATH:/usr/local/go/bin
           export INPUT=$GITHUB_WORKSPACE
           export OUTPUT=$GITHUB_WORKSPACE/$PLATFORM/yubihsm-connector
           rm -rf $OUTPUT
@@ -270,15 +273,7 @@ jobs:
           
           cp resources/release/yubihsm-connector.spec $RPM_DIR/SPECS/
           
-          rpmbuild -bb $RPM_DIR/SPECS/yubihsm-connector.spec
-          
-          echo "------------ ls /github/home/rpmbuild"
-          ls /github/home/rpmbuild
-          echo "------------ ls /github/home/rpmbuild/RPMS"
-          ls /github/home/rpmbuild/RPMS
-          echo "------------ ls /github/home/rpmbuild/RPMS/x86_64"
-          ls /github/home/rpmbuild/RPMS/x86_64
-          
+          rpmbuild -bb $RPM_DIR/SPECS/yubihsm-connector.spec          
           cp /github/home/rpmbuild/RPMS/x86_64/*.rpm $OUTPUT/
 
           LICENSE_DIR="$OUTPUT/share/yubihsm-connector"
