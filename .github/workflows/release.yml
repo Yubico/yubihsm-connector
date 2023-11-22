@@ -149,7 +149,7 @@ jobs:
           echo "PLATFORM = $PLATFORM"
           
           if [ $PLATFORM = "ubuntu1804" ] || [ "$PLATFORM" = "ubuntu1604" ] || [ $PLATFORM = "ubuntu1404" ] || [ $PLATFORM = "debian10" ]; then
-            curl -L --max-redirs 2 -o - https://golang.org/dl/go1.17.linux-amd64.tar.gz |\
+            curl -L --max-redirs 2 -o - https://golang.org/dl/go1.13.8.linux-amd64.tar.gz |\
               tar -C /usr/local -xzvf -
           else
             apt-get install -y golang
@@ -251,7 +251,9 @@ jobs:
             . /opt/rh/devtoolset-7/enable
 
             curl -L --max-redirs 2 -o - https://golang.org/dl/go1.17.linux-amd64.tar.gz |\
-              tar -C /usr/local -xzvf -          
+              tar -C /usr/local -xzvf -    
+          
+            find / -name "gcc"
 
           else
             dnf -y update
