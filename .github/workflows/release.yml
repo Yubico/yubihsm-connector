@@ -261,7 +261,6 @@ jobs:
         env:
           PLATFORM: ${{ env.PLATFORM }}
         run: |
-#         The path set is only relevant for CentOS7
           export PATH=$PATH:/usr/local/go/bin:/opt/rh/devtoolset-7/root/usr/lib/gcc
                
           export INPUT=$GITHUB_WORKSPACE
