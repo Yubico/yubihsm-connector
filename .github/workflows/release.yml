@@ -146,14 +146,15 @@ jobs:
           apt-get update && apt-get dist-upgrade -y
           apt-get install -y build-essential libusb-1.0.0-dev pkg-config chrpath git curl
           
-          if [ $PLATFORM == "ubuntu1804"" ] || [ $PLATFORM == "ubuntu1604"" ] || [ $PLATFORM == "ubuntu1404" ] || [ $PLATFORM == "debian10" ]; then
+          echo "PLATFORM = $PLATFORM"
+          
+          if [ "$PLATFORM" == "ubuntu1804" ] || [ "$PLATFORM" == "ubuntu1604" ] || [ $PLATFORM == "ubuntu1404" ] || [ $PLATFORM == "debian10" ]; then
             curl -L --max-redirs 2 -o - https://golang.org/dl/go1.17.linux-amd64.tar.gz |\
               tar -C /usr/local -xzvf -
           else
             apt-get install -y golang
           fi
-          
-          
+                    
           curl -L -o go-bin-deb.dpkg https://github.com/mh-cbon/go-bin-deb/releases/download/0.0.19/go-bin-deb-amd64.deb
           dpkg -i go-bin-deb.dpkg
           apt-get install --fix-missing
@@ -238,6 +239,7 @@ jobs:
             yum -y install devtoolset-7-gcc     \
                               devtoolset-7-gcc-c++ \
                               devtoolset-7-make    \
+                              make                 \
                               chrpath              \
                               git                  \
                               libusbx-devel        \
@@ -268,6 +270,17 @@ jobs:
           cp resources/release/yubihsm-connector.spec $RPM_DIR/SPECS/
           
           rpmbuild -bb $RPM_DIR/SPECS/yubihsm-connector.spec
+          
+          pwd
+          echo "------------"
+          ls
+          echo "------------ ls $RPM_DIR"
+          ls $RPM_DIR
+          echo "------------ ls $RPM_DIR/RPMS"
+          ls $RPM_DIR/RPMS
+          echo "------------ ls $RPM_DIR/RPMS/x86_64"
+          ls $RPM_DIR/RPMS/x86_64
+          
           cp $RPM_DIR/RPMS/x86_64/*.rpm $OUTPUT/
 
           LICENSE_DIR="$OUTPUT/share/yubihsm-connector"
