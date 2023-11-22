@@ -84,6 +84,10 @@ jobs:
           set -e -o pipefail
           set -x
           mkdir artifact
+          
+          if [${{ matrix.arch }} == "arm"]
+            brew install golang
+          fi
                                        
           make GB_BUILD_FLAGS="-tags disable_seccomp -ldflags '-s'"
           strip -u -r bin/yubihsm-connector*
@@ -142,18 +146,7 @@ jobs:
           export DEBIAN_FRONTEND=noninteractive
 
           apt-get update && apt-get dist-upgrade -y
-          apt-get install -y build-essential libusb-1.0.0-dev pkg-config chrpath git curl
-          
-          export PATH=$PATH:$GITHUB_WORKSPACE/go/bin
-          if [[ ! -x $(command -v go ) ]]; then
-            echo "Installing go via curl"
-            curl -L --max-redirs 2 -o - https://golang.org/dl/go1.17.linux-amd64.tar.gz |\
-              tar -C $GITHUB_WORKSPACE -xzvf -
-          fi
-          
-          ls -l $GITHUB_WORKSPACE
-          echo "-------------"
-          ls -l $GITHUB_WORKSPACE/go
+          apt-get install -y build-essential libusb-1.0.0-dev pkg-config chrpath git curl golang
           
           if [[ ! -x $(command -v go-bin-deb) ]]; then
             curl -L -o go-bin-deb.dpkg https://github.com/mh-cbon/go-bin-deb/releases/download/0.0.19/go-bin-deb-amd64.deb
@@ -167,7 +160,6 @@ jobs:
         run: |
           set -x
           mkdir -p artifact/yubihsm-connector
-          export PATH=$PATH:$GITHUB_WORKSPACE/go/bin
 
           if [ $PLATFORM == "ubuntu1404" ]; then
             export CXXFLAGS="-stdlib=libstdc++" CC=/usr/bin/gcc CXX=/usr/bin/g++
