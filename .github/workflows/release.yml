@@ -170,7 +170,6 @@ jobs:
           mkdir -p $OUTPUT
           
           export PATH=$PATH:/usr/local/go/bin
-          go version
           
           make
           strip --strip-all bin/yubihsm-connector
@@ -252,8 +251,6 @@ jobs:
 
             curl -L --max-redirs 2 -o - https://golang.org/dl/go1.17.linux-amd64.tar.gz |\
               tar -C /usr/local -xzvf -    
-          
-            find / -name "gcc"
 
           else
             dnf -y update
@@ -264,7 +261,9 @@ jobs:
         env:
           PLATFORM: ${{ env.PLATFORM }}
         run: |
-          export PATH=$PATH:/usr/local/go/bin
+#         The path set is only relevant for CentOS7
+          export PATH=$PATH:/usr/local/go/bin:/opt/rh/devtoolset-7/root/usr/lib/gcc
+               
           export INPUT=$GITHUB_WORKSPACE
           export OUTPUT=$GITHUB_WORKSPACE/$PLATFORM/yubihsm-connector
           rm -rf $OUTPUT
