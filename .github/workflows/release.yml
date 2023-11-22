@@ -84,9 +84,7 @@ jobs:
           set -e -o pipefail
           set -x
           mkdir artifact
-          
-          export PATH=$PATH:/usr/local/bin/go
-                              
+                                       
           make GB_BUILD_FLAGS="-tags disable_seccomp -ldflags '-s'"
           strip -u -r bin/yubihsm-connector*
           cp bin/yubihsm-connector artifact
@@ -125,28 +123,6 @@ jobs:
 
     steps:
 
-      - name: install dependencies from package management
-        env:
-          CC: ${{ matrix.cc }}
-          DEBIAN_FRONTEND: noninteractive
-        run: |
-          export DEBIAN_FRONTEND=noninteractive
-
-          apt-get update && apt-get dist-upgrade -y
-          apt-get install -y build-essential libusb-1.0.0-dev pkg-config chrpath git curl
-          
-          export PATH=$PATH:/usr/local/go/bin
-          if [[ ! -x $(command -v go ) ]]; then
-            curl -L --max-redirs 2 -o - https://golang.org/dl/go1.17.linux-amd64.tar.gz |\
-              sudo tar -C /usr/local -xzvf -
-          fi
-          
-          if [[ ! -x $(command -v go-bin-deb) ]]; then
-            curl -L -o go-bin-deb.dpkg https://github.com/mh-cbon/go-bin-deb/releases/download/0.0.19/go-bin-deb-amd64.deb
-            dpkg -i go-bin-deb.dpkg
-            apt-get install --fix-missing
-          fi          
-
       - name: Checkout repository
         uses: actions/checkout@v3
 
@@ -158,13 +134,40 @@ jobs:
           PLATFORM=$(echo -n "$DOCKER_IMAGE" | sed -E 's/[^a-zA-Z0-9]//g')
           echo "PLATFORM=$PLATFORM" >> $GITHUB_ENV
 
+      - name: install dependencies from package management
+        env:
+          CC: ${{ matrix.cc }}
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+
+          apt-get update && apt-get dist-upgrade -y
+          apt-get install -y build-essential libusb-1.0.0-dev pkg-config chrpath git curl
+          
+          export PATH=$PATH:$GITHUB_WORKSPACE/go/bin
+          if [[ ! -x $(command -v go ) ]]; then
+            echo "Installing go via curl"
+            curl -L --max-redirs 2 -o - https://golang.org/dl/go1.17.linux-amd64.tar.gz |\
+              tar -C $GITHUB_WORKSPACE -xzvf -
+          fi
+          
+          ls -l $GITHUB_WORKSPACE
+          echo "-------------"
+          ls -l $GITHUB_WORKSPACE/go
+          
+          if [[ ! -x $(command -v go-bin-deb) ]]; then
+            curl -L -o go-bin-deb.dpkg https://github.com/mh-cbon/go-bin-deb/releases/download/0.0.19/go-bin-deb-amd64.deb
+            dpkg -i go-bin-deb.dpkg
+            apt-get install --fix-missing
+          fi          
+
       - name: build release
         env:
           PLATFORM: ${{ env.PLATFORM }}
         run: |
           set -x
           mkdir -p artifact/yubihsm-connector
-          export PATH=$PATH:/usr/local/go/bin
+          export PATH=$PATH:$GITHUB_WORKSPACE/go/bin
 
           if [ $PLATFORM == "ubuntu1404" ]; then
             export CXXFLAGS="-stdlib=libstdc++" CC=/usr/bin/gcc CXX=/usr/bin/g++
