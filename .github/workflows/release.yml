@@ -249,7 +249,7 @@ jobs:
                               redhat-rpm-config
             . /opt/rh/devtoolset-7/enable
 
-            curl -L --max-redirs 2 -o - https://golang.org/dl/go1.17.linux-amd64.tar.gz |\
+            curl -L --max-redirs 2 -o - https://golang.org/dl/go1.13.8.linux-amd64.tar.gz |\
               tar -C /usr/local -xzvf -    
 
           else
