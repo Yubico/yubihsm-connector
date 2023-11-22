@@ -261,7 +261,7 @@ jobs:
         env:
           PLATFORM: ${{ env.PLATFORM }}
         run: |
-          export PATH=$PATH:/usr/local/go/bin:/opt/rh/devtoolset-7/root/usr/lib/gcc
+          export PATH=$PATH:/usr/local/go/bin:/opt/rh/devtoolset-7/root/usr/bin
                
           export INPUT=$GITHUB_WORKSPACE
           export OUTPUT=$GITHUB_WORKSPACE/$PLATFORM/yubihsm-connector
