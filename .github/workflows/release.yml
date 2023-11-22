@@ -170,6 +170,7 @@ jobs:
           mkdir -p $OUTPUT
           
           export PATH=$PATH:/usr/local/go/bin
+          go version
           
           make
           strip --strip-all bin/yubihsm-connector
@@ -211,6 +212,7 @@ jobs:
           "fedora:38",
           "centos:7"
         ]
+        cc: [ "gcc" ]
 
     name: build on ${{ matrix.environment }}
     runs-on: ubuntu-latest
