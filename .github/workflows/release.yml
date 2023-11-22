@@ -148,7 +148,7 @@ jobs:
           
           echo "PLATFORM = $PLATFORM"
           
-          if [ "$PLATFORM" == "ubuntu1804" ] || [ "$PLATFORM" == "ubuntu1604" ] || [ $PLATFORM == "ubuntu1404" ] || [ $PLATFORM == "debian10" ]; then
+          if [[ $PLATFORM == "ubuntu1804" ]] || [[ "$PLATFORM" == "ubuntu1604" ]] || [ $PLATFORM == "ubuntu1404" ] || [ $PLATFORM == "debian10" ]; then
             curl -L --max-redirs 2 -o - https://golang.org/dl/go1.17.linux-amd64.tar.gz |\
               tar -C /usr/local -xzvf -
           else
@@ -271,17 +271,14 @@ jobs:
           
           rpmbuild -bb $RPM_DIR/SPECS/yubihsm-connector.spec
           
-          pwd
-          echo "------------"
-          ls
-          echo "------------ ls $RPM_DIR"
-          ls $RPM_DIR
-          echo "------------ ls $RPM_DIR/RPMS"
-          ls $RPM_DIR/RPMS
-          echo "------------ ls $RPM_DIR/RPMS/x86_64"
-          ls $RPM_DIR/RPMS/x86_64
+          echo "------------ ls /github/home/rpmbuild"
+          ls /github/home/rpmbuild
+          echo "------------ ls /github/home/rpmbuild/RPMS"
+          ls /github/home/rpmbuild/RPMS
+          echo "------------ ls /github/home/rpmbuild/RPMS/x86_64"
+          ls /github/home/rpmbuild/RPMS/x86_64
           
-          cp $RPM_DIR/RPMS/x86_64/*.rpm $OUTPUT/
+          cp /github/home/rpmbuild/RPMS/x86_64/*.rpm $OUTPUT/
 
           LICENSE_DIR="$OUTPUT/share/yubihsm-connector"
           mkdir -p $LICENSE_DIR
