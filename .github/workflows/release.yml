@@ -85,7 +85,7 @@ jobs:
           set -x
           mkdir artifact
           
-          if [${{ matrix.arch }} == "arm"]; then
+          if [[ ${{ matrix.arch }} == "arm" ]]; then
             brew install golang
           fi
                                        
@@ -144,7 +144,15 @@ jobs:
           export DEBIAN_FRONTEND=noninteractive
 
           apt-get update && apt-get dist-upgrade -y
-          apt-get install -y build-essential libusb-1.0.0-dev pkg-config chrpath git curl golang
+          apt-get install -y build-essential libusb-1.0.0-dev pkg-config chrpath git curl
+          
+          if [ $PLATFORM == "ubuntu1804"" ] || [ $PLATFORM == "ubuntu1604"" ] || [ $PLATFORM == "ubuntu1404" ] || [ $PLATFORM == "debian10" ]; then
+            curl -L --max-redirs 2 -o - https://golang.org/dl/go1.17.linux-amd64.tar.gz |\
+              tar -C /usr/local -xzvf -
+          else
+            apt-get install -y golang
+          fi
+          
           
           curl -L -o go-bin-deb.dpkg https://github.com/mh-cbon/go-bin-deb/releases/download/0.0.19/go-bin-deb-amd64.deb
           dpkg -i go-bin-deb.dpkg
@@ -160,6 +168,8 @@ jobs:
           OUTPUT=$GITHUB_WORKSPACE/$PLATFORM/yubihsm-connector
           mkdir -p $OUTPUT
           
+          export PATH=$PATH:/usr/local/go/bin
+          
           make
           strip --strip-all bin/yubihsm-connector
           version=`bin/yubihsm-connector version`
@@ -168,7 +178,7 @@ jobs:
 
           LICESE_DIR="$OUTPUT/share/yubihsm-connector"
           mkdir -p $LICESE_DIR
-          cp -r $GITHUB_WORKSPACE/yubihsm-connector/resources/release/licenses $LICESE_DIR/
+          cp -r $GITHUB_WORKSPACE/resources/release/licenses $LICESE_DIR/
           for lf in $LICESE_DIR/licenses/*; do
             chmod 644 $lf
           done
@@ -245,7 +255,7 @@ jobs:
         env:
           PLATFORM: ${{ env.PLATFORM }}
         run: |
-          export INPUT=$GITHUB_WORKSPACE/yubihsm-connector
+          export INPUT=$GITHUB_WORKSPACE
           export OUTPUT=$GITHUB_WORKSPACE/$PLATFORM/yubihsm-connector
           rm -rf $OUTPUT
           mkdir -p $OUTPUT
