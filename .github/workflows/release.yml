@@ -85,7 +85,7 @@ jobs:
           set -x
           mkdir artifact
           
-          if [${{ matrix.arch }} == "arm"]
+          if [${{ matrix.arch }} == "arm"]; then
             brew install golang
           fi
                                        
@@ -118,8 +118,6 @@ jobs:
           "debian:11",
           "debian:10"
         ]
-        # perform gcc builds for all environments
-        cc: [ "gcc" ]
 
     name: build on ${{ matrix.environment }}
     runs-on: ubuntu-latest
@@ -148,38 +146,39 @@ jobs:
           apt-get update && apt-get dist-upgrade -y
           apt-get install -y build-essential libusb-1.0.0-dev pkg-config chrpath git curl golang
           
-          if [[ ! -x $(command -v go-bin-deb) ]]; then
-            curl -L -o go-bin-deb.dpkg https://github.com/mh-cbon/go-bin-deb/releases/download/0.0.19/go-bin-deb-amd64.deb
-            dpkg -i go-bin-deb.dpkg
-            apt-get install --fix-missing
-          fi          
+          curl -L -o go-bin-deb.dpkg https://github.com/mh-cbon/go-bin-deb/releases/download/0.0.19/go-bin-deb-amd64.deb
+          dpkg -i go-bin-deb.dpkg
+          apt-get install --fix-missing
 
       - name: build release
         env:
           PLATFORM: ${{ env.PLATFORM }}
         run: |
           set -x
-          mkdir -p artifact/yubihsm-connector
-
-          if [ $PLATFORM == "ubuntu1404" ]; then
-            export CXXFLAGS="-stdlib=libstdc++" CC=/usr/bin/gcc CXX=/usr/bin/g++
-          fi
+          
+          # Create directory containing all output
+          OUTPUT=$GITHUB_WORKSPACE/$PLATFORM/yubihsm-connector
+          mkdir -p $OUTPUT
           
           make
           strip --strip-all bin/yubihsm-connector
           version=`bin/yubihsm-connector version`
           go-bin-deb generate -f deb/deb.json -a amd64 --version=${version}-1
-          cp *.deb artifact/yubihsm-connector
+          cp *.deb $OUTPUT/
 
-          LICESE_DIR="artifact/yubihsm-connector/share/yubihsm-connector"
+          LICESE_DIR="$OUTPUT/share/yubihsm-connector"
           mkdir -p $LICESE_DIR
-          cp -r resources/release/licenses $LICESE_DIR/
+          cp -r $GITHUB_WORKSPACE/yubihsm-connector/resources/release/licenses $LICESE_DIR/
           for lf in $LICESE_DIR/licenses/*; do
             chmod 644 $lf
           done
 
-          cd artifact
-          tar -C ".." -zcvf "yubihsm-connector-$PLATFORM-amd64.tar.gz" "yubihsm-connector"
+          cd $OUTPUT
+          rm -f yubihsm-connector-$PLATFORM-amd64.tar.gz
+          tar -C .. -zcvf ../yubihsm-connector-$PLATFORM-amd64.tar.gz yubihsm-connector
+          rm -f *.deb
+          rm -rf licenses
+          rm -rf ../yubihsm-connector
 
       - name: install binaries
         run: |
@@ -190,7 +189,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: "yubihsm-connector-${{ env.PLATFORM }}-amd64"
-          path: artifact
+          path: ${{ env.PLATFORM }}
 
   redhat_based:
     strategy:
@@ -234,51 +233,54 @@ jobs:
                               libusbx-devel        \
                               libseccomp-devel     \
                               rpm-build            \
-                              redhat-rpm-config
+                              redhat-rpm-config    \
+                              golang
             . /opt/rh/devtoolset-7/enable
           else
             dnf -y update
-            dnf -y install gcc binutils git make libusb1-devel rpmdevtools go
-          fi
-          
-          export PATH=$PATH:/usr/local/go/bin:~/go/bin
-          if [[ ! -x $(command -v go ) ]]; then
-            curl -L --max-redirs 2 -o - https://golang.org/dl/go1.17.linux-amd64.tar.gz |\
-            tar -C /usr/local -xzvf -
+            dnf -y install gcc binutils git make libusb1-devel rpmdevtools golang
           fi
 
       - name: build release binaries
         env:
           PLATFORM: ${{ env.PLATFORM }}
         run: |
-          mkdir -p artifact/yubihsm-connector
-          export PATH=$PATH:/usr/local/go/bin:~/go/bin
+          export INPUT=$GITHUB_WORKSPACE/yubihsm-connector
+          export OUTPUT=$GITHUB_WORKSPACE/$PLATFORM/yubihsm-connector
+          rm -rf $OUTPUT
+          mkdir -p $OUTPUT
           
           mkdir -p $GITHUB_WORKSPACE/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
-          echo '%_topdir %(echo $GITHUB_WORKSPACE)/rpmbuild' > $GITHUB_WORKSPACE/.rpmmacros
+          echo '%_topdir %(echo $HOME)/rpmbuild' > $GITHUB_WORKSPACE/.rpmmacros
           
           RPM_DIR=$GITHUB_WORKSPACE/rpmbuild
+          
           cp resources/release/yubihsm-connector.spec $RPM_DIR/SPECS/
           
           rpmbuild -bb $RPM_DIR/SPECS/yubihsm-connector.spec
-          cp $RPM_DIR/RPMS/x86_64/*.rpm artifact/yubihsm-connector/
+          cp $RPM_DIR/RPMS/x86_64/*.rpm $OUTPUT/
 
-          LICENSE_DIR="artifact/yubihsm-connector"
+          LICENSE_DIR="$OUTPUT/share/yubihsm-connector"
           mkdir -p $LICENSE_DIR
-          cp -r resources/release/licenses $LICENSE_DIR/
+          cp -r $INPUT/resources/release/licenses $LICENSE_DIR/
           for lf in $LICENSE_DIR/licenses/*; do
             chmod 644 $lf
           done
           
-          cd artifact
-          tar -C ".." -zcvf "yubihsm-connector-$PLATFORM-amd64.tar.gz" "yubihsm-connector"
+          cd $OUTPUT
+          rm -f "yubihsm-connector-$PLATFORM-amd64.tar.gz"
+          tar -C ".." -zcvf "../yubihsm-connector-$PLATFORM-amd64.tar.gz" "yubihsm-connector"
+          rm -f *.rpm
+          rm -rf licenses
+          rm -rf ../yubihsm-connector
 
       - name: install binaries
         working-directory: /github/home/rpmbuild/RPMS/x86_64
         run: |
-          yum install -y $GITHUB_WORKSPACE/rpmbuild/RPMS/x86_64/yubihsm-connector-*.rpm
+          yum install -y ./yubihsm-connector-*.rpm
 
       - name: upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: "yubihsm-connector-${{ env.PLATFORM }}-amd64"
+          path: ${{ env.PLATFORM }}
