@@ -148,7 +148,7 @@ jobs:
           
           echo "PLATFORM = $PLATFORM"
           
-          if [[ $PLATFORM == "ubuntu1804" ]] || [[ "$PLATFORM" == "ubuntu1604" ]] || [ $PLATFORM == "ubuntu1404" ] || [ $PLATFORM == "debian10" ]; then
+          if [ $PLATFORM = "ubuntu1804" ] || [ "$PLATFORM" = "ubuntu1604" ] || [ $PLATFORM == "ubuntu1404" ] || [ $PLATFORM == "debian10" ]; then
             curl -L --max-redirs 2 -o - https://golang.org/dl/go1.17.linux-amd64.tar.gz |\
               tar -C /usr/local -xzvf -
           else
@@ -245,9 +245,10 @@ jobs:
                               libusbx-devel        \
                               libseccomp-devel     \
                               rpm-build            \
-                              redhat-rpm-config    \
-                              golang
+                              redhat-rpm-config
             . /opt/rh/devtoolset-7/enable
+          
+            yum -y install golang
           else
             dnf -y update
             dnf -y install gcc binutils git make libusb1-devel rpmdevtools golang
