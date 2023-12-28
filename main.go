@@ -27,7 +27,7 @@ import (
 	"syscall"
 	"time"
 
-	yaml "gopkg.in/yaml.v3"
+	"gopkg.in/yaml.v3"
 
 	"github.com/kardianos/service"
 
@@ -97,7 +97,10 @@ func (p *program) Stop(s service.Service) error {
 
 //go:generate go run version.in.go
 func main() {
-	loggingInit(service.Interactive())
+	if err := loggingInit(service.Interactive()); err != nil {
+		panic(err)
+	}
+
 	if !service.Interactive() {
 		if runtime.GOOS == "windows" {
 			viper.AddConfigPath(path.Join(os.Getenv("ProgramData"), "YubiHSM"))
@@ -158,11 +161,9 @@ func main() {
 				log.SetLevel(log.DebugLevel)
 			}
 
-			certkeyErr := fmt.Errorf("cert and key must both be specified")
-			if viper.GetString("cert") != "" && viper.GetString("key") == "" {
-				return certkeyErr
-			} else if viper.GetString("cert") == "" && viper.GetString("key") != "" {
-				return certkeyErr
+			// Requirement both cert and key are supplied, or none of them
+			if (viper.GetString("cert") == "") != (viper.GetString("key") == "") {
+				return fmt.Errorf("cert and key must both be specified, or none")
 			}
 
 			serial, err := ensureSerial(viper.GetString("serial"))
@@ -216,7 +217,7 @@ func main() {
 		Long: `YubiHSM Connector configuration
 
 Most configuration knobs for the connector are not available at the command
-line, and must be supplied via a configurtion file.
+line, and must be supplied via a configuration file.
 
 listen: localhost:12345
 syslog: false
