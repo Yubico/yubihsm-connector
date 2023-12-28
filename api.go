@@ -154,7 +154,7 @@ func statusHandler(w http.ResponseWriter, r *http.Request, serial string) {
 	} else {
 		fmt.Fprintf(w, "serial=%s\n", serial)
 	}
-	fmt.Fprintf(w, "version=%s\n", Version.String())
+	fmt.Fprintf(w, "version=%s\n", Version)
 	fmt.Fprintf(w, "pid=%d\n", os.Getpid())
 	fmt.Fprintf(w, "address=%s\n", split[0])
 	fmt.Fprintf(w, "port=%s\n", split[1])

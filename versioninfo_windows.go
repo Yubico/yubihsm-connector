@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:generate goversioninfo -64
+//go:build windows
+
+//go:generate go run github.com/josephspurrier/goversioninfo/cmd/goversioninfo -64
 
 package main

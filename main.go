@@ -95,7 +95,7 @@ func (p *program) Stop(s service.Service) error {
 	return p.srv.Shutdown(context.TODO())
 }
 
-//go:generate go run version.in.go
+//go:generate go run -tags=generate ./gen
 func main() {
 	if err := loggingInit(service.Interactive()); err != nil {
 		panic(err)
@@ -142,7 +142,7 @@ func main() {
 
 	rootCmd := &cobra.Command{
 		Use:           "yubihsm-connector",
-		Long:          `YubiHSM Connector v` + Version.String(),
+		Long:          `YubiHSM Connector ` + Version,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
@@ -176,7 +176,7 @@ func main() {
 				"pid":     os.Getpid(),
 				"seccomp": viper.GetBool("seccomp"),
 				"syslog":  viper.GetBool("syslog"),
-				"version": Version.String(),
+				"version": Version,
 				"cert":    viper.GetString("cert"),
 				"key":     viper.GetString("key"),
 				"timeout": timeoutToMs(viper.GetUint32("timeout")),
@@ -269,7 +269,7 @@ serial: 0123456789
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
-			fmt.Fprintf(os.Stdout, "%s\n", Version.String())
+			fmt.Fprintf(os.Stdout, "%s\n", Version)
 			return nil
 		},
 	}
