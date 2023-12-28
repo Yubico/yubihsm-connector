@@ -1,0 +1,28 @@
+FROM golang:1.21-bookworm AS build
+
+RUN apt-get update -y \
+ && apt-get install --no-install-recommends -y \
+		build-essential \
+		libusb-1.0.0-dev \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /build
+COPY *.go VERSION ./
+RUN go generate \
+ && CGO_ENABLED=1 go build \
+    -ldflags='-s -w' \
+    -o yubihsm-connector
+
+FROM debian:bookworm-slim
+
+RUN apt-get update \
+ && apt-get install --no-install-recommends -y libusb-1.0.0 \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+COPY --from=build /usr/lib/src/yubihsm-connector/bin/yubihsm-connector /usr/local/bin/
+
+ENV YUBIHSM_CONNECTOR_LISTEN=0.0.0.0:12345
+ENTRYPOINT ["yubihsm-connector"]
+CMD ["-d"]

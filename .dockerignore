@@ -1,0 +1,5 @@
+bin/*
+pkg/*
+*.syso
+versioninfo.json
+version.go

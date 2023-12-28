@@ -3,26 +3,22 @@ name: Release binaries
 
 on: [push]
 
+env:
+  VERSION: 3.0.5-SNAPSHOT
+
 jobs:
 
   source:
     name: Build source release
     runs-on: ubuntu-latest
-    env:
-      VERSION: 3.0.4
     steps:
       - name: checkout
         uses: actions/checkout@v3
 
       - name: Make source release
         run: |
-          set -e -o pipefail
-          set -x
-                  
           mkdir -p artifact/yubihsm-connector
           tar --exclude .git --exclude .github --exclude artifact --transform="s/^\./yubihsm-connector-$VERSION/" -czf ../yubihsm-connector-$VERSION.tar.gz .
-          pwd
-          ls ..
           cp ../yubihsm-connector-$VERSION.tar.gz artifact/yubihsm-connector
 
       - name: Upload artifact
@@ -38,17 +34,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: 🦫 Setup go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+          check-latest: true
+
       - name: Build and make MSI installer
         run: |
           $ErrorActionPreference = "Stop"
           Set-PSDebug -Trace 1
-          mkdir artifact
 
-          choco install -y golang 
-          
-          go mod tidy
-          go generate ./...
+          go generate
           go build -o bin/yubihsm-connector.exe
+
+          mkdir artifact
           cp bin/yubihsm-connector.exe artifact\
           
           ./bin/yubihsm-connector.exe version
@@ -79,22 +79,28 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Build and make MSI installer
+      - name: 🦫 Setup go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+          check-latest: true
+
+      - name: Build
         run: |
-          set -e -o pipefail
-          set -x
-          mkdir artifact
-          
-          if [[ ${{ matrix.arch }} == "arm" ]]; then
-            brew install golang
-          fi
-                                       
-          make GB_BUILD_FLAGS="-tags disable_seccomp -ldflags '-s'"
+          go generate
+          go build -o -ldflags='-s' bin/yubihsm-connector
           strip -u -r bin/yubihsm-connector*
+
+      - name: Package
+        run: |
+          mkdir artifact
           cp bin/yubihsm-connector artifact
 
-          ./bin/yubihsm-connector version
-          ./bin/yubihsm-connector --help          
+      - name: Test version
+        run: ./bin/yubihsm-connector version
+
+      - name: Test help
+        run: ./bin/yubihsm-connector --help
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
@@ -106,27 +112,31 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        environment: [
-          "ubuntu:23.10",
-          "ubuntu:23.04",
-          "ubuntu:22.04",
-          "ubuntu:20.04",
-          "ubuntu:18.04",
-          "ubuntu:16.04",
-          "ubuntu:14.04",
-          "debian:12",
-          "debian:11",
-          "debian:10"
-        ]
+        environment:
+          - "ubuntu:23.10"
+          - "ubuntu:23.04"
+          - "ubuntu:22.04"
+          - "ubuntu:20.04"
+          - "ubuntu:18.04"
+          - "ubuntu:16.04"
+          - "ubuntu:14.04"
+          - "debian:12"
+          - "debian:11"
+          - "debian:10"
 
     name: build on ${{ matrix.environment }}
     runs-on: ubuntu-latest
     container: ${{ matrix.environment }}
 
     steps:
-
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: 🦫 Setup go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+          check-latest: true
 
       - name: extract platform name
         env:
@@ -138,7 +148,6 @@ jobs:
 
       - name: install dependencies from package management
         env:
-          CC: ${{ matrix.cc }}
           DEBIAN_FRONTEND: noninteractive
         run: |
           export DEBIAN_FRONTEND=noninteractive
@@ -148,13 +157,6 @@ jobs:
           
           echo "PLATFORM = $PLATFORM"
           
-          if [ $PLATFORM = "ubuntu1804" ] || [ "$PLATFORM" = "ubuntu1604" ] || [ $PLATFORM = "ubuntu1404" ] || [ $PLATFORM = "debian10" ]; then
-            curl -L --max-redirs 2 -o - https://golang.org/dl/go1.13.8.linux-amd64.tar.gz |\
-              tar -C /usr/local -xzvf -
-          else
-            apt-get install -y golang
-          fi
-                    
           curl -L -o go-bin-deb.dpkg https://github.com/mh-cbon/go-bin-deb/releases/download/0.0.19/go-bin-deb-amd64.deb
           dpkg -i go-bin-deb.dpkg
           apt-get install --fix-missing
@@ -169,20 +171,16 @@ jobs:
           OUTPUT=$GITHUB_WORKSPACE/$PLATFORM/yubihsm-connector
           mkdir -p $OUTPUT
           
-          export PATH=$PATH:/usr/local/go/bin
-          
-          make
+          go generate
+          go build -o -ldflags='-s -w' bin/yubihsm-connector
           strip --strip-all bin/yubihsm-connector
           version=`bin/yubihsm-connector version`
           go-bin-deb generate -f deb/deb.json -a amd64 --version=${version}-1
           cp *.deb $OUTPUT/
 
-          LICESE_DIR="$OUTPUT/share/yubihsm-connector"
-          mkdir -p $LICESE_DIR
-          cp -r $GITHUB_WORKSPACE/resources/release/licenses $LICESE_DIR/
-          for lf in $LICESE_DIR/licenses/*; do
-            chmod 644 $lf
-          done
+          LICENSE_DIR="$OUTPUT/share/yubihsm-connector"
+          mkdir -p $LICENSE_DIR
+          cp -r $GITHUB_WORKSPACE/resources/release/licenses $LICENSE_DIR/
 
           cd $OUTPUT
           rm -f yubihsm-connector-$PLATFORM-amd64.tar.gz
@@ -221,6 +219,12 @@ jobs:
 
       - name: checkout repository
         uses: actions/checkout@v3
+
+      - name: 🦫 Setup go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+          check-latest: true
 
       - name: extract platform name
         env:
@@ -302,3 +306,28 @@ jobs:
         with:
           name: "yubihsm-connector-${{ env.PLATFORM }}-amd64"
           path: ${{ env.PLATFORM }}
+
+  docker_based:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: bookworm
+          - name: distroless
+          - name: scratch
+
+    name: Docker build ${{ matrix.environment }}
+    runs-on: ubuntu-latest
+    env:
+      # FIXME set version
+      FULL_IMAGE: yubihsm-connector:${{ matrix.name }}-${{ github.SHA }}
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v3
+
+      - name: Docker Build and Tag
+        run: |
+          docker build \
+          -f Dockerfile.${{ matrix.name }} \
+          --tag ${{ env.FULL_IMAGE }} \
+          .
