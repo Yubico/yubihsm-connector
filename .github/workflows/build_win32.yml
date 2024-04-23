@@ -1,0 +1,51 @@
+name: Windows 32 build
+# This machine tests building the software on a both 32 and 64 Windows architecture.
+
+on: [push]
+
+jobs:
+  Windowsx-build:
+    name: Windows Server 2022 - x86
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build and make MSI installer
+        run: |
+          $ErrorActionPreference = "Stop"
+          Set-PSDebug -Trace 1
+          mkdir artifact
+          
+          ls 'C:\Program Files (x86)'
+          echo "------------------------ "
+          
+          Invoke-WebRequest -Uri https://go.dev/dl/go1.22.2.windows-386.msi -OutFile go1.msi -UseBasicParsing
+          
+          $log = "$env:GITHUB_WORKSPACE\install.log"
+          $procMain = Start-Process "msiexec" "/i `"go1.msi`" /qn /l*! `"$log`"" -NoNewWindow -PassThru
+          $procMain.WaitForExit()
+          
+          ls 'C:\Program Files (x86)'
+          
+          
+
+#          choco install -y golang
+#
+#          go mod tidy
+#          go generate ./...
+#          go build -o bin/yubihsm-connector.exe
+#          cp bin/yubihsm-connector.exe artifact\
+#
+#          ./bin/yubihsm-connector.exe version
+#          ./bin/yubihsm-connector.exe --help
+#
+#          cd resources/win-installer
+#          & cmd /c '"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsMSBuildCmd.bat" && msbuild YubiHSMConnectorInstaller.sln /p:Configuration=Release'
+#          cp x64/Release/yubihsm-connector-windows-amd64.msi ../../artifact/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: yubihsm-connector-windows-amd64
+          path: artifact
