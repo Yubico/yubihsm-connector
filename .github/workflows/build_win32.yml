@@ -17,16 +17,13 @@ jobs:
           Set-PSDebug -Trace 1
           mkdir artifact
           
-          ls 'C:\Program Files (x86)'
-          echo "------------------------ "
-          
           Invoke-WebRequest -Uri https://go.dev/dl/go1.22.2.windows-386.msi -OutFile go1.msi -UseBasicParsing
           
           $log = "$env:GITHUB_WORKSPACE\install.log"
           $procMain = Start-Process "msiexec" "/i `"go1.msi`" /qn /l*! `"$log`"" -NoNewWindow -PassThru
           $procMain.WaitForExit()
           
-          ls 'C:\Program Files (x86)'
+          ls 'C:\Program Files (x86)\Go'
           
           
 
