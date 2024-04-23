@@ -23,7 +23,7 @@ jobs:
           $procMain = Start-Process "msiexec" "/i `"go1.msi`" /qn /l*! `"$log`"" -NoNewWindow -PassThru
           $procMain.WaitForExit()
           
-          ls 'C:\Program Files (x86)\Go'
+          ls 'C:\Program Files (x86)\Go\bin'
           
           
 
