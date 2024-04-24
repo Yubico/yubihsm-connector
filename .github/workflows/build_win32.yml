@@ -24,7 +24,8 @@ jobs:
           $procMain.WaitForExit()
           
           ls 'C:\Program Files (x86)\Go\bin'
-          &'C:\Program Files (x86)\Go\bin\go.exe' help mod tidy
+
+          $env:Path += ";C:\Program Files (x86)\Go\bin"
           
           &'C:\Program Files (x86)\Go\bin\go.exe' version
           &'C:\Program Files (x86)\Go\bin\go.exe' mod tidy -go="1.16" 
