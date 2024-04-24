@@ -46,7 +46,7 @@ jobs:
 
           choco install -y golang 
           
-          go mod tidy -compat=1.21.9
+          go mod tidy
           go generate ./...
           go build -o bin/yubihsm-connector.exe
           cp bin/yubihsm-connector.exe artifact\
