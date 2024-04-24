@@ -19,6 +19,11 @@ jobs:
           
           Invoke-WebRequest -Uri https://go.dev/dl/go1.22.2.windows-386.msi -OutFile go1.msi -UseBasicParsing
           
+          $env:GOOS="windows"
+          $env:GOARCH="386"
+          $env:GOHOSTOS=$env:GOOS
+          $env:GOHOSTARCH=$env:GOARCH
+          
           $log = "$env:GITHUB_WORKSPACE\install.log"
           $procMain = Start-Process "msiexec" "/i `"go1.msi`" /qn /l*! `"$log`"" -NoNewWindow -PassThru
           $procMain.WaitForExit()
@@ -26,17 +31,13 @@ jobs:
           ls 'C:\mingw32\bin'
 
           $env:Path += "C:\mingw32\bin;C:\Program Files (x86)\Go\bin;$env:Path"
-          $env:GOOS="windows"
-          $env:GOARCH="386"
-          $env:GOHOSTOS=$env:GOOS
-          $env:GOHOSTARCH=$env:GOARCH
           
           $env:CC=x86_64-w64-mingw32-gcc
           &'C:\Program Files (x86)\Go\bin\go.exe' version
           &'C:\Program Files (x86)\Go\bin\go.exe' mod tidy -go="1.16"
           &'C:\Program Files (x86)\Go\bin\go.exe' mod tidy -go="1.17"
           &'C:\Program Files (x86)\Go\bin\go.exe' generate ./...
-          &'C:\Program Files (x86)\Go\bin\go.exe' build -o bin/yubihsm-connector.exe
+          &'C:\Program Files (x86)\Go\bin\go.exe' build -buildmode=exe -o bin/yubihsm-connector.exe
           cp bin/yubihsm-connector.exe artifact\
 
           ./bin/yubihsm-connector.exe version
