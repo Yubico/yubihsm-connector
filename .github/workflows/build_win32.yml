@@ -27,8 +27,8 @@ jobs:
           &'C:\Program Files (x86)\Go\bin\go.exe' help mod tidy
           
           &'C:\Program Files (x86)\Go\bin\go.exe' version
-          &'C:\Program Files (x86)\Go\bin\go.exe' mod tidy -go=1.16 
-          &'C:\Program Files (x86)\Go\bin\go.exe' mod tidy -go=1.17
+          &'C:\Program Files (x86)\Go\bin\go.exe' mod tidy -go="1.16" 
+          &'C:\Program Files (x86)\Go\bin\go.exe' mod tidy -go="1.17"
           &'C:\Program Files (x86)\Go\bin\go.exe' generate ./...
           &'C:\Program Files (x86)\Go\bin\go.exe' build -o bin/yubihsm-connector.exe
           cp bin/yubihsm-connector.exe artifact\
