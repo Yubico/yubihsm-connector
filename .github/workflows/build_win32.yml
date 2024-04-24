@@ -32,6 +32,10 @@ jobs:
 
           $env:Path += "C:\mingw32\bin;C:\Program Files (x86)\Go\bin;$env:Path"
           
+          $Env:Path.Split(';')
+          
+          go env
+          
           $env:CC=x86_64-w64-mingw32-gcc
           &'C:\Program Files (x86)\Go\bin\go.exe' version
           &'C:\Program Files (x86)\Go\bin\go.exe' mod tidy -go="1.16"
