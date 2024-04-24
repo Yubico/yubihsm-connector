@@ -30,11 +30,15 @@ jobs:
           
           ls 'C:\mingw32\bin'
 
-          $env:Path += "C:\mingw32\bin;C:\Program Files (x86)\Go\bin;$env:Path"
+          $env:Path = "C:\mingw32\bin;C:\Program Files (x86)\Go\bin;$env:Path"
           
           $Env:Path.Split(';')
           
           go env
+          
+          ls 'C:\hostedtoolcache\windows\go'
+          ls 'C:\hostedtoolcache\windows\go\1.21.9'
+          
           
           $env:CC=x86_64-w64-mingw32-gcc
           &'C:\Program Files (x86)\Go\bin\go.exe' version
