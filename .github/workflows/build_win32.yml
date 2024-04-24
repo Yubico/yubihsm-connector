@@ -25,7 +25,7 @@ jobs:
           
           ls 'C:\Program Files (x86)\Go\bin'
           
-          &'C:\Program Files (x86)\Go\bin\go.exe' mod tidy -compat=1.17
+          &'C:\Program Files (x86)\Go\bin\go.exe' mod tidy -compat=1.22.2
           &'C:\Program Files (x86)\Go\bin\go.exe' generate ./...
           &'C:\Program Files (x86)\Go\bin\go.exe' build -o bin/yubihsm-connector.exe
           cp bin/yubihsm-connector.exe artifact\

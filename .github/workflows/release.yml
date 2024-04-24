@@ -46,7 +46,7 @@ jobs:
 
           choco install -y golang 
           
-          go mod tidy -compat=1.17
+          go mod tidy -compat=1.22.2
           go generate ./...
           go build -o bin/yubihsm-connector.exe
           cp bin/yubihsm-connector.exe artifact\
@@ -85,9 +85,9 @@ jobs:
           set -x
           mkdir artifact
           
-          if [[ ${{ matrix.arch }} == "arm" ]]; then
-            brew install golang
-          fi
+#         if [[ ${{ matrix.arch }} == "arm" ]]; then
+          brew install golang
+#         fi
                                        
           make GB_BUILD_FLAGS="-tags disable_seccomp -ldflags '-s'"
           strip -u -r bin/yubihsm-connector*
