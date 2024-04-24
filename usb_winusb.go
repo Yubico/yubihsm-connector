@@ -35,7 +35,7 @@ var device struct {
 	mtx sync.Mutex
 }
 
-type C_DWORD C.ulong
+type C_DWORD C.DWORD
 
 func (e C_DWORD) Error() string {
 	return fmt.Sprintf("Windows Error: 0x%x", uint(e))
