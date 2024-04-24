@@ -26,6 +26,10 @@ jobs:
           ls 'C:\mingw32\bin'
 
           $env:Path += "C:\mingw32\bin;C:\Program Files (x86)\Go\bin;$env:Path"
+          $env:GOOS="windows"
+          $env:GOARCH="386"
+          $env:GOHOSTOS=$env:GOOS
+          $env:GOHOSTARCH=$env:GOARCH
           
           $env:CC=x86_64-w64-mingw32-gcc
           &'C:\Program Files (x86)\Go\bin\go.exe' version
