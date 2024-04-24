@@ -85,9 +85,7 @@ jobs:
           set -x
           mkdir artifact
           
-#         if [[ ${{ matrix.arch }} == "arm" ]]; then
           brew install golang
-#         fi
                                        
           make GB_BUILD_FLAGS="-tags disable_seccomp -ldflags '-s'"
           strip -u -r bin/yubihsm-connector*
