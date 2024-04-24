@@ -45,8 +45,9 @@ jobs:
           mkdir artifact
 
           choco install -y golang 
+          go version
           
-          go mod tidy
+          go mod tidy -go=1.16 && go mod tidy -go=1.17
           go generate ./...
           go build -o bin/yubihsm-connector.exe
           cp bin/yubihsm-connector.exe artifact\
