@@ -37,11 +37,12 @@ import (
 	"github.com/spf13/viper"
 )
 
-var (
-	// Host header allowlisting
-	hostHeaderAllowlisting bool
-	hostHeaderAllowlist    = []string{"localhost", "localhost.", "127.0.0.1", "[::1]"}
-)
+type Config struct {
+	HostHeaderAllowlist       []string `mapstructure:"host-header-allowlist"`
+	EnableHostHeaderAllowlist bool     `mapstructure:"enable-host-header-allowlist"`
+}
+
+var config Config
 
 type program struct {
 	srv *http.Server
@@ -154,6 +155,11 @@ func main() {
 					return err
 				}
 			}
+
+			if err := viper.Unmarshal(&config); err != nil {
+				return err
+			}
+
 			if viper.GetBool("debug") {
 				log.SetLevel(log.DebugLevel)
 			}
@@ -190,24 +196,34 @@ func main() {
 	}
 	rootCmd.PersistentFlags().StringP("config", "c", "", "config file")
 	viper.BindPFlag("config", rootCmd.PersistentFlags().Lookup("config"))
+
 	rootCmd.PersistentFlags().BoolP("debug", "d", false, "debug output")
 	viper.BindPFlag("debug", rootCmd.PersistentFlags().Lookup("debug"))
+
 	rootCmd.PersistentFlags().BoolP("seccomp", "s", false, "enable seccomp")
 	viper.BindPFlag("seccomp", rootCmd.PersistentFlags().Lookup("seccomp"))
-	rootCmd.PersistentFlags().StringP("cert", "", "", "certificate (X509)")
+
+	rootCmd.PersistentFlags().String("cert", "", "certificate (X509)")
 	viper.BindPFlag("cert", rootCmd.PersistentFlags().Lookup("cert"))
-	rootCmd.PersistentFlags().StringP("key", "", "", "certificate key")
+
+	rootCmd.PersistentFlags().String("key", "", "certificate key")
 	viper.BindPFlag("key", rootCmd.PersistentFlags().Lookup("key"))
-	rootCmd.PersistentFlags().StringP("serial", "", "", "device serial")
+
+	rootCmd.PersistentFlags().String("serial", "", "device serial")
 	viper.BindPFlag("serial", rootCmd.PersistentFlags().Lookup("serial"))
+
 	rootCmd.PersistentFlags().StringP("listen", "l", "localhost:12345", "listen address")
 	viper.BindPFlag("listen", rootCmd.PersistentFlags().Lookup("listen"))
+
 	rootCmd.PersistentFlags().BoolP("syslog", "L", false, "log to syslog/eventlog")
 	viper.BindPFlag("syslog", rootCmd.PersistentFlags().Lookup("syslog"))
-	rootCmd.PersistentFlags().BoolVar(&hostHeaderAllowlisting, "enable-host-header-allowlist", false, "Enable Host header allowlisting")
-	viper.BindPFlag("enable-host-allowlist", rootCmd.PersistentFlags().Lookup("enable-host-header-allowlist"))
-	rootCmd.PersistentFlags().StringSliceVar(&hostHeaderAllowlist, "host-header-allowlist", hostHeaderAllowlist, "Host header allowlist")
-	viper.BindPFlag("host-allowlist", rootCmd.PersistentFlags().Lookup("host-header-allowlist"))
+
+	rootCmd.PersistentFlags().Bool("enable-host-header-allowlist", false, "Enable Host header allowlisting")
+	viper.BindPFlag("enable-host-header-allowlist", rootCmd.PersistentFlags().Lookup("enable-host-header-allowlist"))
+
+	rootCmd.PersistentFlags().StringSlice("host-header-allowlist", []string{"localhost", "localhost.", "127.0.0.1", "[::1]"}, "Host header allowlist")
+	viper.BindPFlag("host-header-allowlist", rootCmd.PersistentFlags().Lookup("host-header-allowlist"))
+
 	rootCmd.PersistentFlags().Uint32P("timeout", "t", 0, "(DEPRECATED) USB operation timeout in milliseconds (default 0, never timeout)")
 	viper.BindPFlag("timeout", rootCmd.PersistentFlags().Lookup("timeout"))
 

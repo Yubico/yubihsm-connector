@@ -94,7 +94,7 @@ func middlewareWrapper(next http.HandlerFunc) http.HandlerFunc {
 			}
 		}()
 
-		if hostHeaderAllowlisting && !validateHost(r.Host) {
+		if config.EnableHostHeaderAllowlist && !validateHost(r.Host) {
 			clog.WithField("host", r.Host).Error("host not in allowlist")
 			http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
 			return
@@ -235,10 +235,11 @@ func extractHost(addr string) string {
 
 func validateHost(addr string) bool {
 	host := extractHost(addr)
-	for _, h := range hostHeaderAllowlist {
+	for _, h := range config.HostHeaderAllowlist {
 		if h == host {
 			return true
 		}
 	}
+
 	return false
 }
