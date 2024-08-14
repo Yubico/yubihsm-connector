@@ -105,16 +105,11 @@ jobs:
       fail-fast: false
       matrix:
         environment: [
-          "ubuntu:23.10",
-          "ubuntu:23.04",
+          "ubuntu:24.04",
           "ubuntu:22.04",
           "ubuntu:20.04",
-          "ubuntu:18.04",
-          "ubuntu:16.04",
-          "ubuntu:14.04",
           "debian:12",
           "debian:11",
-          "debian:10"
         ]
 
     name: build on ${{ matrix.environment }}
@@ -205,9 +200,8 @@ jobs:
       fail-fast: false
       matrix:
         environment: [
-          "fedora:37",
-          "fedora:38",
-          "centos:7"
+          "fedora:39",
+          "fedora:40",
         ]
         cc: [ "gcc" ]
 
@@ -232,28 +226,8 @@ jobs:
         env:
           PLATFORM: ${{ env.PLATFORM }}
         run: |
-          if [ $PLATFORM = "centos7" ]; then
-            yum -y install centos-release-scl
-            yum -y update && yum -y upgrade
-            yum -y install devtoolset-7-gcc     \
-                              devtoolset-7-gcc-c++ \
-                              devtoolset-7-make    \
-                              make                 \
-                              chrpath              \
-                              git                  \
-                              libusbx-devel        \
-                              libseccomp-devel     \
-                              rpm-build            \
-                              redhat-rpm-config
-            . /opt/rh/devtoolset-7/enable
-
-            curl -L --max-redirs 2 -o - https://golang.org/dl/go1.13.8.linux-amd64.tar.gz |\
-              tar -C /usr/local -xzvf -    
-
-          else
-            dnf -y update
-            dnf -y install gcc binutils git make libusb1-devel rpmdevtools golang
-          fi
+          dnf -y update
+          dnf -y install gcc binutils git make libusb1-devel rpmdevtools golang
 
       - name: build release binaries
         env:

@@ -1,5 +1,5 @@
 Name:		yubihsm-connector
-Version:	3.0.4
+Version:	3.0.5
 Release:	1%{?dist}
 Summary:	USB to HTTP bridge for the YubiHSM
 
@@ -35,5 +35,5 @@ install -m 0644 LICENSE %{buildroot}/%{_prefix}/share/licenses/%{name}
 %{_prefix}/share/licenses/%{name}/LICENSE
 
 %changelog
-* Fri Jan 15 2021 Aveen Ismail <aveen.ismail@yubico.com> - 3.0.0
-- Releasing 3.0.0
+* Wed Aug 14 2024 Aveen Ismail <aveen.ismail@yubico.com> - 3.0.5
+- Releasing 3.0.5
