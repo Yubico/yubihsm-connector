@@ -165,7 +165,7 @@ func apiHandler(w http.ResponseWriter, r *http.Request, serial string) {
 	var n int
 	var err error
 	const min_len = 3        // The minimum request is CMD (1 byte) + LEN (2 bytes)
-	const max_len = 2048 + 3 // Allow 3 bytes more than the HSM can handle before returning http.StatusBadRequest
+	const max_len = 3136 + 3 // Allow 3 bytes more than the HSM can handle before returning http.StatusBadRequest
 
 	cid := r.Header.Get("X-Request-ID")
 	clog := log.WithFields(log.Fields{
