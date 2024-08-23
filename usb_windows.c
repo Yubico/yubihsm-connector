@@ -337,7 +337,7 @@ static DWORD GetUsbDevice(int vendorId, int productId, char* serialNumber, PDEVI
           // short this times out before it has time to complete. The reason for
           // doing this is that there might be data left in the device buffers from
           // earlier transactions, this should flush it.
-          BYTE buf[2048];
+          BYTE buf[4096];
           ULONG transferred = 0;
           ULONG timeout = 10;
 
