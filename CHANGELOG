@@ -1,3 +1,8 @@
+=== Version 3.0.5
+
+* Increase maximum message size the connector can handle
+* Fix compatibility with later Go versions 
+
 === Version 3.0.4
 
 * Add changelog
