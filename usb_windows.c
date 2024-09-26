@@ -184,26 +184,25 @@ static BOOL IsMatchingDevice(WINUSB_INTERFACE_HANDLE interfaceHandle, int vendor
         goto Cleanup;
     }
 
-    // If the user provided a serialNumber, we need to grab the string descriptor which
-    // contains the string version of the serialNumber and compare the values after normalizing
+    // Grab the string descriptor which contains the string version of the serialNumber.
+    // This is cheap enough and will tell us if the device has disappeared on us.
+    if (!WinUsb_GetDescriptor(interfaceHandle,
+                                USB_STRING_DESCRIPTOR_TYPE,
+                                deviceDescriptor.iSerialNumber,
+                                0x409, // English
+                                (PUCHAR)serialBuffer,
+                                sizeof(serialBuffer),
+                                &bytesTransferred))
+    {
+        error = GetLastError();
+        printf("WinUsb_GetDescriptor(STRING) failed with 0x%x\n", error);
+        goto Cleanup;
+    }
+
+    // If the user provided a serialNumber, we need to compare the values after normalizing
     // both on UTF-16.
     if (serialNumber)
     {
-        ZeroMemory(serialBuffer, sizeof(serialBuffer));
-
-        if (!WinUsb_GetDescriptor(interfaceHandle,
-                                  USB_STRING_DESCRIPTOR_TYPE,
-                                  deviceDescriptor.iSerialNumber,
-                                  0x409, // English
-                                  (PUCHAR)serialBuffer,
-                                  sizeof(serialBuffer),
-                                  &bytesTransferred))
-        {
-            error = GetLastError();
-            printf("WinUsb_GetDescriptor(STRING) failed with 0x%x\n", error);
-            goto Cleanup;
-        }
-
         // USB Strings are UTF-16LE. The length is 2 less than the whole descriptor
         // length, as per the USB spec (9.6.9 in USB 3.2 spec). Maximum size is 255.
         serialDescriptor = (PUSB_STRING_DESCRIPTOR)serialBuffer;
