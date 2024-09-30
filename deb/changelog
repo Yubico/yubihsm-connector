@@ -1,0 +1,6 @@
+yubihsm-connector (3.0.5) unstable; urgency=medium
+
+    * Increase maximum message size the connector can handle
+    * Fix compatibility with later Go versions
+
+ -- Aveen Ismail <aveen.ismail@yubico.com>  Mon, 30 Sep 2024 10:48:36 +0100
