@@ -12,7 +12,7 @@ jobs:
       VERSION: 3.0.4
     steps:
       - name: checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Make source release
         run: |
@@ -26,7 +26,7 @@ jobs:
           cp ../yubihsm-connector-$VERSION.tar.gz artifact/yubihsm-connector
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: yubihsm-connector-src
           path: artifact
@@ -36,7 +36,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Build and make MSI installer
         run: |
@@ -59,7 +59,7 @@ jobs:
           cp x64/Release/yubihsm-connector-windows-amd64.msi ../../artifact/          
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: yubihsm-connector-windows-amd64
           path: artifact
@@ -71,13 +71,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: macos-14-large
+          - os: macos-latest-large
             arch: amd
           - os: macos-latest-xlarge
             arch: arm
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Build and make MSI installer
         run: |
@@ -95,7 +95,7 @@ jobs:
           ./bin/yubihsm-connector --help          
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: yubihsm-connector-mac-${{ matrix.arch }}64
           path: artifact
@@ -105,6 +105,8 @@ jobs:
       fail-fast: false
       matrix:
         environment: [
+          "ubuntu:25.04",
+          "ubuntu:24.10",
           "ubuntu:24.04",
           "ubuntu:22.04",
           "ubuntu:20.04",
@@ -119,7 +121,7 @@ jobs:
     steps:
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: extract platform name
         env:
@@ -190,7 +192,7 @@ jobs:
           dpkg -i ./yubihsm-connector_*.deb
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: "yubihsm-connector-${{ env.PLATFORM }}-amd64"
           path: ${{ env.PLATFORM }}
@@ -200,8 +202,8 @@ jobs:
       fail-fast: false
       matrix:
         environment: [
-          "fedora:39",
-          "fedora:40",
+          "fedora:41",
+          "fedora:42",
         ]
         cc: [ "gcc" ]
 
@@ -212,7 +214,7 @@ jobs:
     steps:
 
       - name: checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: extract platform name
         env:
@@ -270,7 +272,7 @@ jobs:
           yum install -y ./yubihsm-connector-*.rpm
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: "yubihsm-connector-${{ env.PLATFORM }}-amd64"
           path: ${{ env.PLATFORM }}
