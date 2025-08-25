@@ -79,11 +79,11 @@ func (p *program) Start(s service.Service) error {
 	go func(tls bool) {
 		if tls {
 			if err := p.srv.ListenAndServeTLS(cert, key); err != nil {
-				log.Printf("ListenAndServeTLS failure: %s", err)
+				log.Errorf("ListenAndServeTLS failure: %s", err)
 			}
 		} else {
 			if err := p.srv.ListenAndServe(); err != nil {
-				log.Printf("ListenAndServe failure: %s", err)
+				log.Errorf("ListenAndServe failure: %s", err)
 			}
 		}
 	}(tls)
