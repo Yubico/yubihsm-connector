@@ -16,7 +16,7 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -185,7 +185,7 @@ func apiHandler(w http.ResponseWriter, r *http.Request, serial string) {
 		return
 	}
 
-	if buf, err = ioutil.ReadAll(r.Body); err != nil {
+    if buf, err = io.ReadAll(io.LimitReader(r.Body, max_len)); err != nil {
 		clog.WithError(err).Error("failed reading incoming request")
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
