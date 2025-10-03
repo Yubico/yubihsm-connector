@@ -195,7 +195,7 @@ func main() {
 	}
 	rootCmd.PersistentFlags().StringP("config", "c", "", "config file")
 	viper.BindPFlag("config", rootCmd.PersistentFlags().Lookup("config"))
-	rootCmd.PersistentFlags().StringP("log-level", "", "info", "log level")
+	rootCmd.PersistentFlags().StringP("log-level", "", "info", "Log level. Available options: trace, debug, info, warn, error, fatal, panic.")
 	viper.BindPFlag("log-level", rootCmd.PersistentFlags().Lookup("log-level"))
 	rootCmd.PersistentFlags().BoolP("debug", "d", false, "debug output")
 	viper.BindPFlag("debug", rootCmd.PersistentFlags().Lookup("debug"))
