@@ -154,13 +154,16 @@ func main() {
 					return err
 				}
 			}
+			if viper.GetBool("debug") {
+				log.SetLevel(log.DebugLevel)
+			}
 			if level, err := log.ParseLevel(viper.GetString("log-level")); err != nil {
 				return err
 			} else {
 				log.SetLevel(level)
-			}
-			if viper.GetBool("debug") {
-				log.SetLevel(log.DebugLevel)
+				if viper.GetBool("debug") {
+					fmt.Fprintf(os.Stderr, "WARNING: log level set to %v despite -debug\n", level)
+				}
 			}
 
 			certkeyErr := fmt.Errorf("cert and key must both be specified")
