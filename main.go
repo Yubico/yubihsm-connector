@@ -157,11 +157,10 @@ func main() {
 			if viper.GetBool("debug") {
 				log.SetLevel(log.DebugLevel)
 			}
-			if level, err := log.ParseLevel(viper.GetString("log-level")); err != nil {
-				return err
-			} else {
+			level, err := log.ParseLevel(viper.GetString("log-level"))
+			if err == nil {
 				log.SetLevel(level)
-				if viper.GetBool("debug") {
+				if viper.GetBool("debug") && level != log.DebugLevel {
 					fmt.Fprintf(os.Stderr, "WARNING: log level set to %v despite -debug\n", level)
 				}
 			}
@@ -198,9 +197,9 @@ func main() {
 	}
 	rootCmd.PersistentFlags().StringP("config", "c", "", "config file")
 	viper.BindPFlag("config", rootCmd.PersistentFlags().Lookup("config"))
-	rootCmd.PersistentFlags().StringP("log-level", "", "info", "Log level. Available options: trace, debug, info, warn, error, fatal, panic.")
+	rootCmd.PersistentFlags().StringP("log-level", "", "", "Log level. Available options: trace, debug, info, warn, error, fatal, panic.")
 	viper.BindPFlag("log-level", rootCmd.PersistentFlags().Lookup("log-level"))
-	rootCmd.PersistentFlags().BoolP("debug", "d", false, "debug output")
+	rootCmd.PersistentFlags().BoolP("debug", "d", false, "(Deprecated) debug output. This flag is deprecated, please use --log-level=debug instead")
 	viper.BindPFlag("debug", rootCmd.PersistentFlags().Lookup("debug"))
 	rootCmd.PersistentFlags().BoolP("seccomp", "s", false, "enable seccomp")
 	viper.BindPFlag("seccomp", rootCmd.PersistentFlags().Lookup("seccomp"))
