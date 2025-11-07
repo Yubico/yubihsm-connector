@@ -79,11 +79,11 @@ func (p *program) Start(s service.Service) error {
 	go func(tls bool) {
 		if tls {
 			if err := p.srv.ListenAndServeTLS(cert, key); err != nil {
-				log.Printf("ListenAndServeTLS failure: %s", err)
+				log.Errorf("ListenAndServeTLS failure: %s", err)
 			}
 		} else {
 			if err := p.srv.ListenAndServe(); err != nil {
-				log.Printf("ListenAndServe failure: %s", err)
+				log.Errorf("ListenAndServe failure: %s", err)
 			}
 		}
 	}(tls)
@@ -157,6 +157,14 @@ func main() {
 			if viper.GetBool("debug") {
 				log.SetLevel(log.DebugLevel)
 			}
+			if level, err := log.ParseLevel(viper.GetString("log-level")); err != nil {
+				return err
+			} else {
+				log.SetLevel(level)
+				if viper.GetBool("debug") {
+					fmt.Fprintf(os.Stderr, "WARNING: log level set to %v despite -debug\n", level)
+				}
+			}
 
 			certkeyErr := fmt.Errorf("cert and key must both be specified")
 			if viper.GetString("cert") != "" && viper.GetString("key") == "" {
@@ -190,6 +198,8 @@ func main() {
 	}
 	rootCmd.PersistentFlags().StringP("config", "c", "", "config file")
 	viper.BindPFlag("config", rootCmd.PersistentFlags().Lookup("config"))
+	rootCmd.PersistentFlags().StringP("log-level", "", "info", "Log level. Available options: trace, debug, info, warn, error, fatal, panic.")
+	viper.BindPFlag("log-level", rootCmd.PersistentFlags().Lookup("log-level"))
 	rootCmd.PersistentFlags().BoolP("debug", "d", false, "debug output")
 	viper.BindPFlag("debug", rootCmd.PersistentFlags().Lookup("debug"))
 	rootCmd.PersistentFlags().BoolP("seccomp", "s", false, "enable seccomp")
