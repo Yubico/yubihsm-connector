@@ -448,6 +448,7 @@ Cleanup:
         {
             WinUsb_Free(ctx->usbInterface);
         }
+        free(ctx);
     }
 
     return error;
