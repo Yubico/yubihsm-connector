@@ -1,3 +1,10 @@
+=== Version 3.0.6
+
+* Fix potential memory leak when device initialization fails
+* Set limit to the size of read data to avoid potential buffer overflow
+* Add 'log-level' command line flag to support enabling/disabling log levels: trace, debug, info, warn, error, fatal and panic
+* Deprecate command line flag 'debug'
+
 === Version 3.0.5
 
 * Increase maximum message size the connector can handle
