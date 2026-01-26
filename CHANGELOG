@@ -1,3 +1,7 @@
+=== Version 3.0.7
+
+* Update dependencies
+
 === Version 3.0.6
 
 * Fix potential memory leak when device initialization fails

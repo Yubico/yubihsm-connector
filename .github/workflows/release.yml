@@ -9,7 +9,7 @@ jobs:
     name: Build source release
     runs-on: ubuntu-latest
     env:
-      VERSION: 3.0.4
+      VERSION: 3.0.7
     steps:
       - name: checkout
         uses: actions/checkout@v4
