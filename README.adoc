@@ -4,6 +4,10 @@
 
 The connector is self documenting, peruse the `--help`'s.
 
+The YubiHSM Connector requires the user to have permissions to access a USB connection. On Linux, this typically means
+having appropriate udev rules configured. Alternatively, and depending on the OS setup, the connector might need to run
+with elevated privileges.
+
 [source,console]
 ----
 $ yubihsm-connector --help
