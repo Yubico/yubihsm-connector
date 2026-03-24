@@ -16,6 +16,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -92,7 +93,7 @@ func (p *program) Start(s service.Service) error {
 }
 
 func (p *program) Stop(s service.Service) error {
-	return p.srv.Shutdown(context.TODO())
+	return p.srv.Shutdown(context.Background())
 }
 
 //go:generate go run version.in.go
@@ -165,7 +166,7 @@ func main() {
 				}
 			}
 
-			certkeyErr := fmt.Errorf("cert and key must both be specified")
+			certkeyErr := errors.New("cert and key must both be specified")
 			if viper.GetString("cert") != "" && viper.GetString("key") == "" {
 				return certkeyErr
 			} else if viper.GetString("cert") == "" && viper.GetString("key") != "" {
@@ -342,7 +343,7 @@ serial: 0123456789
 }
 
 // XXX(thorduri): Barf.
-var errInvalidSerial = fmt.Errorf("invalid device serial")
+var errInvalidSerial = errors.New("invalid device serial")
 
 func ensureSerial(s string) (string, error) {
 	if s == "" {
