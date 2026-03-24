@@ -16,6 +16,8 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"net/http"
 	"os"
@@ -63,21 +65,41 @@ func (p *program) Start(s service.Service) error {
 		log.Warn("seccomp support has been deprecated and the flag will be removed in future versions")
 	}
 
-	tls := false
+	useTLS := false
 	cert := viper.GetString("cert")
 	key := viper.GetString("key")
 	if cert != "" && key != "" {
-		tls = true
+		useTLS = true
+	}
+
+	cacert := viper.GetString("cacert")
+	if useTLS {
+		p.srv.TLSConfig = &tls.Config{
+			MinVersion: tls.VersionTLS12,
+		}
+		if cacert != "" {
+			caCertPEM, err := os.ReadFile(cacert)
+			if err != nil {
+				return fmt.Errorf("failed to read CA certificate: %w", err)
+			}
+			caCertPool := x509.NewCertPool()
+			if !caCertPool.AppendCertsFromPEM(caCertPEM) {
+				return fmt.Errorf("failed to parse CA certificate from %s", cacert)
+			}
+			p.srv.TLSConfig.ClientAuth = tls.RequireAndVerifyClientCert
+			p.srv.TLSConfig.ClientCAs = caCertPool
+		}
 	}
 
 	log.WithFields(log.Fields{
 		"pid":    os.Getpid(),
 		"listen": addr,
-		"TLS":    tls,
+		"TLS":    useTLS,
+		"mTLS":   cacert != "",
 	}).Debug("takeoff")
 
-	go func(tls bool) {
-		if tls {
+	go func(useTLS bool) {
+		if useTLS {
 			if err := p.srv.ListenAndServeTLS(cert, key); err != nil {
 				log.Errorf("ListenAndServeTLS failure: %s", err)
 			}
@@ -86,7 +108,7 @@ func (p *program) Start(s service.Service) error {
 				log.Errorf("ListenAndServe failure: %s", err)
 			}
 		}
-	}(tls)
+	}(useTLS)
 
 	return nil
 }
@@ -172,6 +194,10 @@ func main() {
 				return certkeyErr
 			}
 
+			if viper.GetString("cacert") != "" && (viper.GetString("cert") == "" || viper.GetString("key") == "") {
+				return fmt.Errorf("cacert requires both cert and key to be specified")
+			}
+
 			serial, err := ensureSerial(viper.GetString("serial"))
 			if err != nil {
 				return err
@@ -185,6 +211,7 @@ func main() {
 				"version": Version.String(),
 				"cert":    viper.GetString("cert"),
 				"key":     viper.GetString("key"),
+				"cacert":  viper.GetString("cacert"),
 				"timeout": timeoutToMs(viper.GetUint32("timeout")),
 				"serial":  serial,
 			}).Debug("preflight complete")
@@ -207,6 +234,8 @@ func main() {
 	viper.BindPFlag("cert", rootCmd.PersistentFlags().Lookup("cert"))
 	rootCmd.PersistentFlags().StringP("key", "", "", "certificate key")
 	viper.BindPFlag("key", rootCmd.PersistentFlags().Lookup("key"))
+	rootCmd.PersistentFlags().StringP("cacert", "", "", "CA certificate (X509) for client verification (mTLS)")
+	viper.BindPFlag("cacert", rootCmd.PersistentFlags().Lookup("cacert"))
 	rootCmd.PersistentFlags().StringP("serial", "", "", "device serial")
 	viper.BindPFlag("serial", rootCmd.PersistentFlags().Lookup("serial"))
 	rootCmd.PersistentFlags().StringP("listen", "l", "localhost:12345", "listen address")
@@ -231,6 +260,7 @@ listen: localhost:12345
 syslog: false
 cert: /path/to/certificate.crt
 key: /path/to/certificate.key
+cacert: /path/to/ca-certificate.crt
 serial: 0123456789
 `,
 	}
