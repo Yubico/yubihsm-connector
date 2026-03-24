@@ -4,6 +4,9 @@
 # Certificate key
 #key: ""
 #
+# CA certificate for client verification (mTLS)
+#cacert: ""
+#
 # Listening address. Defaults to "127.0.0.1:12345".
 #listen: "127.0.0.1:12345"
 #
