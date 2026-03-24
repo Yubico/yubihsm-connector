@@ -19,6 +19,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"slices"
 	"strings"
 	"time"
 
@@ -67,8 +68,7 @@ func middlewareWrapper(next http.HandlerFunc) http.HandlerFunc {
 		}
 		ip := r.Header.Get("X-Real-IP")
 		if ip == "" {
-			s := strings.Split(r.RemoteAddr, ":")
-			ip = s[0]
+			ip, _, _ = strings.Cut(r.RemoteAddr, ":")
 			r.Header.Set("X-Real-IP", ip)
 		}
 
@@ -146,7 +146,7 @@ func statusHandler(w http.ResponseWriter, r *http.Request, serial string) {
 	}
 
 	// Deal with address/port in ycshell.
-	split := strings.Split(viper.GetString("listen"), ":")
+	address, port, _ := strings.Cut(viper.GetString("listen"), ":")
 
 	fmt.Fprintf(w, "status=%s\n", status)
 	if serial == "" {
@@ -156,8 +156,8 @@ func statusHandler(w http.ResponseWriter, r *http.Request, serial string) {
 	}
 	fmt.Fprintf(w, "version=%s\n", Version.String())
 	fmt.Fprintf(w, "pid=%d\n", os.Getpid())
-	fmt.Fprintf(w, "address=%s\n", split[0])
-	fmt.Fprintf(w, "port=%s\n", split[1])
+	fmt.Fprintf(w, "address=%s\n", address)
+	fmt.Fprintf(w, "port=%s\n", port)
 }
 
 func apiHandler(w http.ResponseWriter, r *http.Request, serial string) {
@@ -234,11 +234,5 @@ func extractHost(addr string) string {
 }
 
 func validateHost(addr string) bool {
-	host := extractHost(addr)
-	for _, h := range hostHeaderAllowlist {
-		if h == host {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(hostHeaderAllowlist, extractHost(addr))
 }
