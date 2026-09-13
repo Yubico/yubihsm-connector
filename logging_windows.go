@@ -17,7 +17,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"io"
 
 	"golang.org/x/sys/windows/svc/eventlog"
 
@@ -29,7 +29,7 @@ func loggingInit(interactive bool) error {
 	if interactive {
 		log.SetFormatter(&log.TextFormatter{DisableColors: true})
 	} else {
-		log.SetOutput(ioutil.Discard)
+		log.SetOutput(io.Discard)
 		log.SetFormatter(&log.JSONFormatter{})
 
 		hook, err := NewEventLogHook("YubiHSM Connector")

@@ -184,7 +184,7 @@ func usbProxy(req []byte, cid string, serial string) (resp []byte, err error) {
 		return nil, err
 	}
 
-	for i := 0; i < 2; i++ {
+	for range 2 {
 		if err = usbwrite(req, cid); err != nil {
 			if err2 := usbreopen(cid, err, serial); err2 != nil {
 				return nil, err2

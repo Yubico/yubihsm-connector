@@ -185,15 +185,12 @@ func usbCheck(cid string, serial string) (err error) {
 
 func usbwrite(buf []byte, cid string) (err error) {
 	var n int
-	var ctx context.Context
-
-	ctx = context.Background()
+	ctx := context.Background()
 	if n, err = state.wendpoint.WriteContext(ctx, buf); err != nil {
 		goto out
 	}
 	if len(buf)%64 == 0 {
-		var empty []byte
-		if n, err = state.wendpoint.WriteContext(ctx, empty); err != nil {
+		if n, err = state.wendpoint.WriteContext(ctx, nil); err != nil {
 			goto out
 		}
 	}
@@ -212,10 +209,9 @@ out:
 
 func usbread(cid string, timeout time.Duration) (buf []byte, err error) {
 	var n int
-	var ctx context.Context
 
 	buf = make([]byte, 8192)
-	ctx = context.Background()
+	ctx := context.Background()
 	if timeout > 0 {
 		var cancel func()
 		ctx, cancel = context.WithTimeout(ctx, timeout)
@@ -247,7 +243,7 @@ func usbProxy(req []byte, cid string, serial string) (resp []byte, err error) {
 		return nil, err
 	}
 
-	for i := 0; i < 2; i++ {
+	for range 2 {
 		if err = usbwrite(req, cid); err != nil {
 			if err2 := usbreopen(cid, err, serial); err2 != nil {
 				return nil, err2
