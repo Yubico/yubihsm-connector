@@ -1,4 +1,4 @@
-FROM golang:1.17-bullseye AS build
+FROM golang:1.27-trixie AS build
 
 RUN apt-get update -y && \
 	apt-get install -y \
@@ -17,7 +17,7 @@ WORKDIR /usr/lib/src/yubihsm-connector
 RUN make rebuild
 
 
-FROM debian:bullseye-slim
+FROM debian:trixie-slim
 
 RUN apt-get update -y && \
 	apt-get install -y libusb-1.0.0 && \
