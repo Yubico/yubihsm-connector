@@ -24,6 +24,43 @@ Flags:
 Use "yubihsm-connector [command] --help" for more information about a command.
 ----
 
+== TLS
+
+The connector supports TLS and mutual TLS (mTLS) for securing client connections.
+
+=== Server TLS
+
+To enable TLS, provide a server certificate and key:
+
+[source,console]
+----
+$ yubihsm-connector --cert server.crt --key server.key
+----
+
+=== Mutual TLS (mTLS)
+
+To require client certificate verification, additionally provide a CA certificate used to validate client certificates:
+
+[source,console]
+----
+$ yubihsm-connector --cert server.crt --key server.key --cacert ca.crt
+----
+
+When `--cacert` is specified, the server requires every client to present a valid certificate signed by the given CA. Connections without a valid client certificate are rejected.
+
+The CA certificate file may contain multiple PEM-encoded certificates (a CA bundle).
+
+These options can also be set in the configuration file:
+
+[source,yaml]
+----
+cert: /path/to/server.crt
+key: /path/to/server.key
+cacert: /path/to/ca.crt
+----
+
+Or via environment variables: `YUBIHSM_CONNECTOR_CERT`, `YUBIHSM_CONNECTOR_KEY`, `YUBIHSM_CONNECTOR_CACERT`.
+
 == Development
 
 === Dependencies
