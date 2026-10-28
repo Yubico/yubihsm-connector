@@ -109,7 +109,6 @@ jobs:
           "ubuntu:25.04",
           "ubuntu:24.04",
           "ubuntu:22.04",
-          "debian:12",
           "debian:13",
         ]
 
@@ -142,9 +141,11 @@ jobs:
           
           echo "PLATFORM = $PLATFORM"
           
-          if [ $PLATFORM = "ubuntu1804" ] || [ "$PLATFORM" = "ubuntu1604" ] || [ $PLATFORM = "ubuntu1404" ] || [ $PLATFORM = "debian10" ]; then
-            curl -L --max-redirs 2 -o - https://golang.org/dl/go1.13.8.linux-amd64.tar.gz |\
-              tar -C /usr/local -xzvf -
+          # The distro Go on these platforms is older than 1.21 and cannot parse go.mod
+          if [ "$PLATFORM" = "ubuntu2204" ] || [ "$PLATFORM" = "debian12" ]; then
+            GO_VERSION=$(awk '$1 == "toolchain" { sub("^go", "", $2); print $2 }' go.mod)
+            curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" |\
+              tar -C /usr/local -xzf -
           else
             apt-get install -y golang
           fi
